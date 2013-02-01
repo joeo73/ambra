@@ -19,6 +19,7 @@ import org.ambraproject.filestore.FileStoreService;
 import org.ambraproject.models.Article;
 import org.ambraproject.models.ArticleAsset;
 import org.ambraproject.models.CitedArticle;
+import org.ambraproject.models.CitedArticleAuthor;
 import org.ambraproject.service.xml.XMLService;
 import org.ambraproject.views.AuthorView;
 import org.ambraproject.views.article.ArticleInfo;
@@ -40,8 +41,8 @@ import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 public class FetchArticleServiceTest extends BaseTest {
 
@@ -727,6 +728,10 @@ public class FetchArticleServiceTest extends BaseTest {
 
     article2.setCitedArticles(new ArrayList<CitedArticle>());
 
+    CitedArticleAuthor citedArticleAuthor = new CitedArticleAuthor();
+    citedArticleAuthor.setGivenNames("W");
+    citedArticleAuthor.setSurnames("Balch");
+
     CitedArticle citedArticle2 = new CitedArticle();
     citedArticle2.setKey("1");
     citedArticle2.setYear(2003);
@@ -738,6 +743,7 @@ public class FetchArticleServiceTest extends BaseTest {
     citedArticle2.seteLocationID("461");
     citedArticle2.setJournal("J Cell Biol");
     citedArticle2.setCitationType("http://purl.org/net/nknouf/ns/bibtex#Article");
+    citedArticle2.getAuthors().add(citedArticleAuthor);
 
     article2.getCitedArticles().add(citedArticle2);
 

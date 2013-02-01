@@ -89,6 +89,11 @@
     <property name="templatesDirectory" value="${project.basedir}/src/test/resources/templates"/>
   </bean>
 
+  <bean id="pubGetLookupService" class="org.ambraproject.service.pubget.PubGetLookupServiceImpl">
+    <property name="httpClient" ref="httpClient"/>
+    <property name="pubGetUrl" value="${ambra.services.pubget.url}"/>
+  </bean>
+
   <bean id="articleService" class="org.ambraproject.service.article.ArticleServiceImpl">
     <property name="sessionFactory" ref="sessionFactory"/>
     <property name="permissionsService" ref="permissionsService"/>
@@ -206,6 +211,8 @@
     <property name="articleHtmlCache" ref="articleHtmlCache"/>
     <property name="fileStoreService" ref="fileStoreService"/>
     <property name="articleTransformService" ref="xmlService"/>
+    <property name="pubGetLookupService" ref="pubGetLookupService"/>
+    <property name="guestCrossRefUrl" value="${ambra.services.crossref.guestquery.url}"/>
   </bean>
 
   <bean id="passwordDigestService" class="org.topazproject.ambra.service.password.PasswordDigestService">
