@@ -40,8 +40,13 @@
     <property name="title" column="title" type="string"/>
     <property name="description" column="description" type="text"/>
 
-
     <many-to-one name="currentIssue" column="currentIssueID" class="Issue" cascade="save-update" fetch="join"/>
+
+    <list name="alerts" lazy="false" cascade="save-update">
+      <key column="journalID"/>
+      <index column="alertSortOrder"/>
+      <one-to-many class="JournalAlert"/>
+    </list>
 
     <list name="volumes" lazy="true" cascade="save-update">
       <key column="journalID"/>

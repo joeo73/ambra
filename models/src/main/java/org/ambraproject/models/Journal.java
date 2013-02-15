@@ -32,6 +32,7 @@ public class Journal extends AmbraEntity {
   private Issue currentIssue;
 
   private List<Volume> volumes;
+  private List<JournalAlert> alerts;
 
   public Journal() {
     super();
@@ -96,6 +97,14 @@ public class Journal extends AmbraEntity {
 
   public void setVolumes(List<Volume> volumes) {
     this.volumes = volumes;
+  }
+
+  public List<JournalAlert> getAlerts() {
+    return alerts;
+  }
+
+  public void setAlerts(List<JournalAlert> alerts) {
+    this.alerts = alerts;
   }
 
   @Override

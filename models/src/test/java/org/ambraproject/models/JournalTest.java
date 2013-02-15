@@ -20,10 +20,13 @@ import org.testng.annotations.Test;
 
 import java.io.Serializable;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertEqualsNoOrder;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -64,6 +67,27 @@ public class JournalTest extends BaseHibernateTest {
     assertNotNull(savedJournal.getCurrentIssue(), "didn't cascade save to issue");
     assertEquals(savedJournal.getCurrentIssue(), issue, "Issue didn't have correct properties");
     assertNotNull(savedJournal.getCurrentIssue().getCreated(), "Issue didn't get created date set");
+  }
+
+  @Test
+  public void testSaveWithAlerts() {
+    Journal journal = new Journal("journal key with alerts");
+
+    List<JournalAlert> alerts = new ArrayList<JournalAlert>() {{
+      add(new JournalAlert("alert"));
+      add(new JournalAlert("alert1"));
+    }};
+
+    journal.setAlerts(alerts);
+
+    Serializable journalId = hibernateTemplate.save(journal);
+    Journal savedJournal = (Journal) hibernateTemplate.get(Journal.class, journalId);
+
+    assertNotNull(savedJournal, "didn't save journal");
+
+    List<JournalAlert> alerts1 = savedJournal.getAlerts();
+
+    assertEqualsNoOrder(alerts.toArray(), alerts1.toArray());
   }
 
   @Test

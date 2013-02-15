@@ -248,6 +248,16 @@
         primary key (journalID)
     );
 
+    create table journalAlert (
+        journalAlertID bigint not null auto_increment,
+        lastModified datetime not null,
+        created datetime not null,
+        alertName varchar(255),
+        journalID bigint,
+        alertSortOrder integer,
+        primary key (journalAlertID)
+    );
+
     create table pingback (
         pingbackID bigint not null auto_increment,
         lastModified datetime not null,
@@ -530,6 +540,12 @@
         add constraint FKAB64AF37E96C1C60 
         foreign key (currentIssueID) 
         references issue (issueID);
+
+    alter table journalAlert 
+        add index FKD4D1D465FA7E0635 (journalID), 
+        add constraint FKD4D1D465FA7E0635 
+        foreign key (journalID) 
+        references journal (journalID);
 
     alter table savedSearch 
         add index FK3407F0F78B0DAE3 (userProfileID), 

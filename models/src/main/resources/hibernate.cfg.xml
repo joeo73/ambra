@@ -59,6 +59,7 @@
     <mapping resource="org/ambraproject/models/Issue.hbm.xml"/>
     <mapping resource="org/ambraproject/models/Volume.hbm.xml"/>
     <mapping resource="org/ambraproject/models/Journal.hbm.xml"/>
+    <mapping resource="org/ambraproject/models/JournalAlert.hbm.xml"/>
     <mapping resource="org/ambraproject/models/Annotation.hbm.xml" />
     <mapping resource="org/ambraproject/models/AnnotationCitation.hbm.xml" />
     <mapping resource="org/ambraproject/models/CorrectedAuthor.hbm.xml" />
