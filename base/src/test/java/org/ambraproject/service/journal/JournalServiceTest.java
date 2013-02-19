@@ -14,13 +14,19 @@
 package org.ambraproject.service.journal;
 
 import org.ambraproject.models.Article;
+import org.ambraproject.models.JournalAlert;
+import org.ambraproject.views.JournalAlertView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.ambraproject.action.BaseTest;
 import org.ambraproject.models.Journal;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.testng.Assert.*;
@@ -41,10 +47,17 @@ public class JournalServiceTest extends BaseTest {
     if (!hasInsertedData) {
       hasInsertedData = true;
       for (Object[] row : journalData()) {
+        final String key = (String)row[0];
+
         Journal j = new Journal();
-        j.setJournalKey((String) row[0]);
+
+        j.setJournalKey(key);
         j.seteIssn((String) row[1]);
         j.setTitle((String) row[2]);
+        j.setAlerts(new ArrayList<JournalAlert>() {{
+          add(new JournalAlert(key + "_alert_weekly"));
+          add(new JournalAlert(key + "_alert_monthly"));
+        }});
 
         dummyDataStore.store(j);
       }
@@ -76,6 +89,22 @@ public class JournalServiceTest extends BaseTest {
     assertEquals(j.getJournalKey(), journalKey, "incorrect journal key");
     assertEquals(j.geteIssn(), eIssn, "incorrect journal eIssn");
     assertEquals(j.getTitle(), title, "incorrect journal title");
+  }
+
+  @Test
+  public void getJournalAlertsTest() {
+    List<JournalAlertView> alerts = journalService.getJournalAlerts();
+    String[] expectedAlerts = new String[] {
+      "journal-test_alert_weekly", "journal-test1_alert_weekly", "journal-test2_alert_weekly",
+      "journal-test_alert_monthly", "journal-test1_alert_monthly", "journal-test2_alert_monthly"
+    };
+
+    assertEquals(alerts.size(), 6);
+
+    for(JournalAlertView j : alerts)
+    {
+      assertTrue(Arrays.asList(expectedAlerts).contains(j.getAlertName()));
+    }
   }
 
   @Test

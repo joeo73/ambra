@@ -36,13 +36,17 @@
   <context:component-scan base-package="org.ambraproject"/>
 
   <!-- beans-->
-  <bean id="emailRouteBuilder" class="org.ambraproject.routes.SavedSearchEmailRoutes">
-    <property name="weeklyCron" value="${ambra.sendemail.weekly}"></property>
-    <property name="monthlyCron" value="${ambra.sendemail.monthly}"></property>
-    <property name="mailEndpoint" value="${plos.camel.mail}"></property>
-    <property name="fromEmailAddress" value="${ambra.queue.fromEmailAddress}"></property>
+  <bean id="savedSearchBuilder" class="org.ambraproject.routes.SavedSearchEmailRoutes">
+    <property name="weeklyCron" value="${ambra.sendemail.weekly}" />
+    <property name="monthlyCron" value="${ambra.sendemail.monthly}" />
+    <property name="mailEndpoint" value="${plos.camel.mail}" />
+    <property name="fromEmailAddress" value="${ambra.queue.fromEmailAddress}" />
     <property name="imagePath" value="${ambra.queue.image.path}"/>
+  </bean>
 
+  <bean id="searchAlertBuilder" class="org.ambraproject.routes.EmailAlertsRoutes">
+    <property name="weeklyCron" value="${ambra.alertemail.weekly}" />
+    <property name="monthlyCron" value="${ambra.alertemail.monthly}" />
   </bean>
 
   <bean id="solrServerFactory" class="org.ambraproject.service.search.SolrServerFactory">
@@ -83,8 +87,18 @@
     <property name="sessionFactory" ref="hibernateSessionFactory"/>
   </bean>
 
+  <bean id="journalService" class="org.ambraproject.service.journal.JournalServiceImpl">
+    <property name="sessionFactory" ref="hibernateSessionFactory"/>
+    <property name="configuration" ref="ambraConfiguration" />
+  </bean>
+
   <bean id="savedSearchRunner" class="org.ambraproject.search.SavedSearchRunnerImpl">
-    <property name="searchService"   ref="searchService" />
+    <property name="searchService" ref="searchService" />
+  </bean>
+
+  <bean id="journalSearchAlerts" class="org.ambraproject.search.JournalSearchAlertsImpl">
+    <property name="searchService" ref="searchService" />
+    <property name="journalService" ref="journalService" />
   </bean>
 
   <bean id="quartz" class="org.apache.camel.component.quartz.QuartzComponent">
@@ -92,9 +106,18 @@
 
   <camelContext xmlns="http://camel.apache.org/schema/spring">
     <jmxAgent id="ambra-queue" disabled="true"/>
-    <routeBuilder ref="emailRouteBuilder"/>
+    <routeBuilder ref="savedSearchBuilder"/>
+    <routeBuilder ref="searchAlertBuilder"/>
+
+    <!--
+      This is just the system default
+
+      http://camel.apache.org/threading-model.html
+    -->
+    <threadPoolProfile id="defaultThreadPoolProfile" defaultProfile="true"
+                       poolSize="10" maxPoolSize="20" maxQueueSize="1000"
+                       rejectedPolicy="CallerRuns"/>
   </camelContext>
 
-
-
 </beans>
+

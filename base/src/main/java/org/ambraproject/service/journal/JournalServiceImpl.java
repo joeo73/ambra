@@ -21,18 +21,25 @@
 package org.ambraproject.service.journal;
 
 import org.ambraproject.models.Article;
+import org.ambraproject.models.JournalAlert;
+import org.ambraproject.views.JournalAlertView;
 import org.apache.commons.configuration.Configuration;
 import org.apache.struts2.ServletActionContext;
 import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
+import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.transaction.annotation.Transactional;
 import org.ambraproject.models.Journal;
 import org.ambraproject.service.hibernate.HibernateServiceImpl;
 import org.ambraproject.web.VirtualJournalContext;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -135,6 +142,25 @@ public class JournalServiceImpl extends HibernateServiceImpl implements JournalS
     VirtualJournalContext vjc = (VirtualJournalContext) ServletActionContext.getRequest()
         .getAttribute(VirtualJournalContext.PUB_VIRTUALJOURNAL_CONTEXT);
     return (vjc == null) ? null : vjc.getJournal();
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  @SuppressWarnings("unchecked")
+  public List<JournalAlertView> getJournalAlerts() {
+    return (List<JournalAlertView>) this.hibernateTemplate.execute(new HibernateCallback<Object>() {
+      @Override
+      public Object doInHibernate(Session session) throws HibernateException, SQLException {
+        List<JournalAlertView> alerts = new ArrayList<JournalAlertView>();
+        for(Journal j : (List<Journal>)session.createCriteria(Journal.class).list()) {
+          for(JournalAlert alert : j.getAlerts()) {
+            alerts.add(new JournalAlertView(j.getJournalKey(), alert));
+          }
+        }
+
+        return alerts;
+      }
+    });
   }
 
   @Transactional(readOnly = true)

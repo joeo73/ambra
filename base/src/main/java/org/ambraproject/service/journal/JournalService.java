@@ -20,10 +20,13 @@
 
 package org.ambraproject.service.journal;
 
+import org.ambraproject.views.JournalAlertView;
 import org.apache.commons.configuration.Configuration;
 import org.springframework.beans.factory.annotation.Required;
 import org.ambraproject.models.Journal;
 import org.ambraproject.service.hibernate.HibernateService;
+
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -73,6 +76,13 @@ public interface JournalService extends HibernateService {
    */
   @Deprecated
   public String getCurrentJournalName();
+
+  /**
+    * Get a list of all the journal alerts
+   *
+    * @return a list of journalAlerts
+   */
+  public List<JournalAlertView> getJournalAlerts();
 
   /**
    * Get the list of journals which carry the given object (e.g. article).
