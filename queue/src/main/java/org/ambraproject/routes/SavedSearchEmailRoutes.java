@@ -52,8 +52,6 @@ public class SavedSearchEmailRoutes extends SpringRouteBuilder {
         .setHeader("alertType", simple("monthly"))
         .to("direct:getemaildata");
 
-
-
     from("direct:getemaildata")
         .split().method("savedSearchRetriever", "retrieveSearchAlerts")      // custom spliting
         .to("bean:savedSearchRunner?method=runSavedSearch")
