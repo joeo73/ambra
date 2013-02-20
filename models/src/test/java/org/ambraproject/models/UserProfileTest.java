@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -132,6 +133,12 @@ public class UserProfileTest extends BaseHibernateTest {
     role.setRoleName("test-role-for-profile");
     hibernateTemplate.save(role);
 
+    JournalAlert alert1 = new JournalAlert("alert_weekly");
+    JournalAlert alert2 = new JournalAlert("alert_monthly");
+
+    hibernateTemplate.save(alert1);
+    hibernateTemplate.save(alert2);
+
     final UserProfile profile = new UserProfile();
     profile.setEmail("deltron@3030.com");
     profile.setDisplayName("Deltron3030");
@@ -149,10 +156,16 @@ public class UserProfileTest extends BaseHibernateTest {
     profile.setRoles(new HashSet<UserRole>(1));
     profile.getRoles().add(role);
 
+    Set<JournalAlert> alerts = new HashSet<JournalAlert>();
+    alerts.add(alert1);
+    alerts.add(alert2);
+    profile.setJournalAlerts(alerts);
+
     final Serializable id = hibernateTemplate.save(profile);
     final List<String> expectedAlerts = new ArrayList<String>(2);
     expectedAlerts.add("foo1");
     expectedAlerts.add("foo2");
+
     UserProfile storedProfile = (UserProfile) hibernateTemplate.findByCriteria(
         DetachedCriteria.forClass(UserProfile.class)
             .setFetchMode("roles", FetchMode.JOIN)
@@ -164,6 +177,7 @@ public class UserProfileTest extends BaseHibernateTest {
     assertEquals(storedProfile.getDisplayName(), profile.getDisplayName(), "storedProfile had incorrect display name");
     assertEquals(storedProfile.getBiography(), profile.getBiography(), "storedProfile had incorrect biography");
     assertEquals(storedProfile.getRoles().size(), 1, "Didn't save user role");
+    assertEquals(storedProfile.getJournalAlerts().size(), 2, "Didn't save user alerts");
     assertEquals(storedProfile.getAlertsJournals(), profile.getAlertsJournals(), "saved user didn't have correct alerts text");
     assertEquals(storedProfile.getAlertsList(), expectedAlerts, "saved user didn't return correct alerts list");
 

@@ -57,7 +57,7 @@
 
     <!--We don't want to cascade to roles; creating those should be a totally separate process from creating/users-->
     <set name="roles" cascade="none" table="userProfileRoleJoinTable">
-      <key column="userProfileID"/>
+      <key column="userProfileID" />
       <many-to-many column="userRoleID" class="UserRole"/>
     </set>
 
@@ -65,6 +65,12 @@
       <key column="userProfileID" not-null="true" />
       <one-to-many class="SavedSearch"/>
     </bag>
+
+    <!--We don't want to cascade to alerts; creating those should be a totally separate process from creating/users-->
+    <set name="journalAlerts" cascade="none" table="userProfileJournalAlertJoinTable">
+      <key column="userProfileID" />
+      <many-to-many column="journalAlertID" class="JournalAlert"/>
+    </set>
 
   </class>
 

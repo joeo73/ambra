@@ -10,11 +10,9 @@ create table journalAlert (
   constraint foreign key (journalID) references journal (journalID)
 ) engine=innodb default charset=utf8;
 
-create table userProfileJournalAlert (
+create table userProfileJournalAlertJoinTable (
   journalAlertID bigint(20) not null,
   userProfileID bigint(20) not null,
-  created datetime not null,
-  lastModified datetime not null,
   unique key (userProfileID, journalAlertID),
   constraint foreign key (journalAlertID) references journalAlert (journalAlertID),
   constraint foreign key (userProfileID) references userProfile (userProfileID)
@@ -67,98 +65,98 @@ insert into journalAlert(journalID, sortOrder, alertName, created, lastModified)
 
 
 
-insert into userProfileJournalAlert (userProfileID, journalAlertID, created, lastModified)
-  select u.userProfileID, j.journalAlertID, now(), now() from userProfile u
+insert into userProfileJournalAlertJoinTable (userProfileID, journalAlertID)
+  select u.userProfileID, j.journalAlertID from userProfile u
     join journalAlert j on j.alertName = substring_index(substring_index(u.alertsJournals,',',-1),',',1)
-  on duplicate key update userProfileJournalAlert.userProfileID = userProfileJournalAlert.userProfileID;
+  on duplicate key update userProfileJournalAlertJoinTable.userProfileID = userProfileJournalAlertJoinTable.userProfileID;
 
-insert into userProfileJournalAlert (userProfileID, journalAlertID, created, lastModified)
-  select u.userProfileID, j.journalAlertID, now(), now() from userProfile u
+insert into userProfileJournalAlertJoinTable (userProfileID, journalAlertID)
+  select u.userProfileID, j.journalAlertID from userProfile u
     join journalAlert j on j.alertName = substring_index(substring_index(u.alertsJournals,',',-2),',',1)
-  on duplicate key update userProfileJournalAlert.userProfileID = userProfileJournalAlert.userProfileID;
+  on duplicate key update userProfileJournalAlertJoinTable.userProfileID = userProfileJournalAlertJoinTable.userProfileID;
 
-insert into userProfileJournalAlert (userProfileID, journalAlertID, created, lastModified)
-  select u.userProfileID, j.journalAlertID, now(), now() from userProfile u
+insert into userProfileJournalAlertJoinTable (userProfileID, journalAlertID)
+  select u.userProfileID, j.journalAlertID from userProfile u
     join journalAlert j on j.alertName = substring_index(substring_index(u.alertsJournals,',',-3),',',1)
-  on duplicate key update userProfileJournalAlert.userProfileID = userProfileJournalAlert.userProfileID;
+  on duplicate key update userProfileJournalAlertJoinTable.userProfileID = userProfileJournalAlertJoinTable.userProfileID;
 
-insert into userProfileJournalAlert (userProfileID, journalAlertID, created, lastModified)
-  select u.userProfileID, j.journalAlertID, now(), now() from userProfile u
+insert into userProfileJournalAlertJoinTable (userProfileID, journalAlertID)
+  select u.userProfileID, j.journalAlertID from userProfile u
     join journalAlert j on j.alertName = substring_index(substring_index(u.alertsJournals,',',-4),',',1)
-  on duplicate key update userProfileJournalAlert.userProfileID = userProfileJournalAlert.userProfileID;
+  on duplicate key update userProfileJournalAlertJoinTable.userProfileID = userProfileJournalAlertJoinTable.userProfileID;
 
-insert into userProfileJournalAlert (userProfileID, journalAlertID, created, lastModified)
-  select u.userProfileID, j.journalAlertID, now(), now() from userProfile u
+insert into userProfileJournalAlertJoinTable (userProfileID, journalAlertID)
+  select u.userProfileID, j.journalAlertID from userProfile u
     join journalAlert j on j.alertName = substring_index(substring_index(u.alertsJournals,',',-5),',',1)
-  on duplicate key update userProfileJournalAlert.userProfileID = userProfileJournalAlert.userProfileID;
+  on duplicate key update userProfileJournalAlertJoinTable.userProfileID = userProfileJournalAlertJoinTable.userProfileID;
 
-insert into userProfileJournalAlert (userProfileID, journalAlertID, created, lastModified)
-  select u.userProfileID, j.journalAlertID, now(), now() from userProfile u
+insert into userProfileJournalAlertJoinTable (userProfileID, journalAlertID)
+  select u.userProfileID, j.journalAlertID from userProfile u
     join journalAlert j on j.alertName = substring_index(substring_index(u.alertsJournals,',',-6),',',1)
-  on duplicate key update userProfileJournalAlert.userProfileID = userProfileJournalAlert.userProfileID;
+  on duplicate key update userProfileJournalAlertJoinTable.userProfileID = userProfileJournalAlertJoinTable.userProfileID;
 
-insert into userProfileJournalAlert (userProfileID, journalAlertID, created, lastModified)
-  select u.userProfileID, j.journalAlertID, now(), now() from userProfile u
+insert into userProfileJournalAlertJoinTable (userProfileID, journalAlertID)
+  select u.userProfileID, j.journalAlertID from userProfile u
     join journalAlert j on j.alertName = substring_index(substring_index(u.alertsJournals,',',-7),',',1)
-  on duplicate key update userProfileJournalAlert.userProfileID = userProfileJournalAlert.userProfileID;
+  on duplicate key update userProfileJournalAlertJoinTable.userProfileID = userProfileJournalAlertJoinTable.userProfileID;
 
-insert into userProfileJournalAlert (userProfileID, journalAlertID, created, lastModified)
-  select u.userProfileID, j.journalAlertID, now(), now() from userProfile u
+insert into userProfileJournalAlertJoinTable (userProfileID, journalAlertID)
+  select u.userProfileID, j.journalAlertID from userProfile u
     join journalAlert j on j.alertName = substring_index(substring_index(u.alertsJournals,',',-8),',',1)
-  on duplicate key update userProfileJournalAlert.userProfileID = userProfileJournalAlert.userProfileID;
+  on duplicate key update userProfileJournalAlertJoinTable.userProfileID = userProfileJournalAlertJoinTable.userProfileID;
 
-insert into userProfileJournalAlert (userProfileID, journalAlertID, created, lastModified)
-  select u.userProfileID, j.journalAlertID, now(), now() from userProfile u
+insert into userProfileJournalAlertJoinTable (userProfileID, journalAlertID)
+  select u.userProfileID, j.journalAlertID from userProfile u
     join journalAlert j on j.alertName = substring_index(substring_index(u.alertsJournals,',',-9),',',1)
-on duplicate key update userProfileJournalAlert.userProfileID = userProfileJournalAlert.userProfileID;
+on duplicate key update userProfileJournalAlertJoinTable.userProfileID = userProfileJournalAlertJoinTable.userProfileID;
 
-insert into userProfileJournalAlert (userProfileID, journalAlertID, created, lastModified)
-  select u.userProfileID, j.journalAlertID, now(), now() from userProfile u
+insert into userProfileJournalAlertJoinTable (userProfileID, journalAlertID)
+  select u.userProfileID, j.journalAlertID from userProfile u
     join journalAlert j on j.alertName = substring_index(substring_index(u.alertsJournals,',',-10),',',1)
-on duplicate key update userProfileJournalAlert.userProfileID = userProfileJournalAlert.userProfileID;
+on duplicate key update userProfileJournalAlertJoinTable.userProfileID = userProfileJournalAlertJoinTable.userProfileID;
 
-insert into userProfileJournalAlert (userProfileID, journalAlertID, created, lastModified)
-  select u.userProfileID, j.journalAlertID, now(), now() from userProfile u
+insert into userProfileJournalAlertJoinTable (userProfileID, journalAlertID)
+  select u.userProfileID, j.journalAlertID from userProfile u
     join journalAlert j on j.alertName = substring_index(substring_index(u.alertsJournals,',',-11),',',1)
-on duplicate key update userProfileJournalAlert.userProfileID = userProfileJournalAlert.userProfileID;
+on duplicate key update userProfileJournalAlertJoinTable.userProfileID = userProfileJournalAlertJoinTable.userProfileID;
 
-insert into userProfileJournalAlert (userProfileID, journalAlertID, created, lastModified)
-  select u.userProfileID, j.journalAlertID, now(), now() from userProfile u
+insert into userProfileJournalAlertJoinTable (userProfileID, journalAlertID)
+  select u.userProfileID, j.journalAlertID from userProfile u
     join journalAlert j on j.alertName = substring_index(substring_index(u.alertsJournals,',',-12),',',1)
-on duplicate key update userProfileJournalAlert.userProfileID = userProfileJournalAlert.userProfileID;
+on duplicate key update userProfileJournalAlertJoinTable.userProfileID = userProfileJournalAlertJoinTable.userProfileID;
 
-insert into userProfileJournalAlert (userProfileID, journalAlertID, created, lastModified)
-  select u.userProfileID, j.journalAlertID, now(), now() from userProfile u
+insert into userProfileJournalAlertJoinTable (userProfileID, journalAlertID)
+  select u.userProfileID, j.journalAlertID from userProfile u
     join journalAlert j on j.alertName = substring_index(substring_index(u.alertsJournals,',',-13),',',1)
-on duplicate key update userProfileJournalAlert.userProfileID = userProfileJournalAlert.userProfileID;
+on duplicate key update userProfileJournalAlertJoinTable.userProfileID = userProfileJournalAlertJoinTable.userProfileID;
 
-insert into userProfileJournalAlert (userProfileID, journalAlertID, created, lastModified)
-  select u.userProfileID, j.journalAlertID, now(), now() from userProfile u
+insert into userProfileJournalAlertJoinTable (userProfileID, journalAlertID)
+  select u.userProfileID, j.journalAlertID from userProfile u
     join journalAlert j on j.alertName = substring_index(substring_index(u.alertsJournals,',',-14),',',1)
-on duplicate key update userProfileJournalAlert.userProfileID = userProfileJournalAlert.userProfileID;
+on duplicate key update userProfileJournalAlertJoinTable.userProfileID = userProfileJournalAlertJoinTable.userProfileID;
 
-insert into userProfileJournalAlert (userProfileID, journalAlertID, created, lastModified)
-  select u.userProfileID, j.journalAlertID, now(), now() from userProfile u
+insert into userProfileJournalAlertJoinTable (userProfileID, journalAlertID)
+  select u.userProfileID, j.journalAlertID from userProfile u
     join journalAlert j on j.alertName = substring_index(substring_index(u.alertsJournals,',',-15),',',1)
-on duplicate key update userProfileJournalAlert.userProfileID = userProfileJournalAlert.userProfileID;
+on duplicate key update userProfileJournalAlertJoinTable.userProfileID = userProfileJournalAlertJoinTable.userProfileID;
 
-insert into userProfileJournalAlert (userProfileID, journalAlertID, created, lastModified)
-  select u.userProfileID, j.journalAlertID, now(), now() from userProfile u
+insert into userProfileJournalAlertJoinTable (userProfileID, journalAlertID)
+  select u.userProfileID, j.journalAlertID from userProfile u
     join journalAlert j on j.alertName = substring_index(substring_index(u.alertsJournals,',',-16),',',1)
-on duplicate key update userProfileJournalAlert.userProfileID = userProfileJournalAlert.userProfileID;
+on duplicate key update userProfileJournalAlertJoinTable.userProfileID = userProfileJournalAlertJoinTable.userProfileID;
 
-insert into userProfileJournalAlert (userProfileID, journalAlertID, created, lastModified)
-  select u.userProfileID, j.journalAlertID, now(), now() from userProfile u
+insert into userProfileJournalAlertJoinTable (userProfileID, journalAlertID)
+  select u.userProfileID, j.journalAlertID from userProfile u
     join journalAlert j on j.alertName = substring_index(substring_index(u.alertsJournals,',',-17),',',1)
-on duplicate key update userProfileJournalAlert.userProfileID = userProfileJournalAlert.userProfileID;
+on duplicate key update userProfileJournalAlertJoinTable.userProfileID = userProfileJournalAlertJoinTable.userProfileID;
 
-insert into userProfileJournalAlert (userProfileID, journalAlertID, created, lastModified)
-  select u.userProfileID, j.journalAlertID, now(), now() from userProfile u
+insert into userProfileJournalAlertJoinTable (userProfileID, journalAlertID)
+  select u.userProfileID, j.journalAlertID from userProfile u
     join journalAlert j on j.alertName = substring_index(substring_index(u.alertsJournals,',',-19),',',1)
-on duplicate key update userProfileJournalAlert.userProfileID = userProfileJournalAlert.userProfileID;
+on duplicate key update userProfileJournalAlertJoinTable.userProfileID = userProfileJournalAlertJoinTable.userProfileID;
 
-insert into userProfileJournalAlert (userProfileID, journalAlertID, created, lastModified)
-  select u.userProfileID, j.journalAlertID, now(), now() from userProfile u
+insert into userProfileJournalAlertJoinTable (userProfileID, journalAlertID)
+  select u.userProfileID, j.journalAlertID from userProfile u
     join journalAlert j on j.alertName = substring_index(substring_index(u.alertsJournals,',',-20),',',1)
-on duplicate key update userProfileJournalAlert.userProfileID = userProfileJournalAlert.userProfileID;
+on duplicate key update userProfileJournalAlertJoinTable.userProfileID = userProfileJournalAlertJoinTable.userProfileID;
 

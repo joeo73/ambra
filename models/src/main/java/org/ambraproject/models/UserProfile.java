@@ -61,7 +61,7 @@ public class UserProfile extends AmbraEntity {
   private String biography;
   private String interests;
   private String researchAreas;
-  //csv of alerts
+  //csv of alerts (deprecated)
   private String alertsJournals;
 
   private boolean organizationVisibility;
@@ -69,6 +69,7 @@ public class UserProfile extends AmbraEntity {
   private Set<UserRole> roles;
   
   private List<SavedSearch> savedSearches;
+  private Set<JournalAlert> journalAlerts;
 
   public UserProfile() {
     super();
@@ -263,10 +264,15 @@ public class UserProfile extends AmbraEntity {
     this.organizationVisibility = organizationVisibility;
   }
 
+  @Deprecated
   public String getAlertsJournals() {
     return alertsJournals;
   }
 
+  /**
+   * @deprecated
+   */
+  @Deprecated
   public void setAlertsJournals(String alertsJournals) {
     this.alertsJournals = alertsJournals;
   }
@@ -285,6 +291,14 @@ public class UserProfile extends AmbraEntity {
 
   public void setSavedSearches(List<SavedSearch> savedSearches) {
     this.savedSearches = savedSearches;
+  }
+
+  public Set<JournalAlert> getJournalAlerts() {
+    return journalAlerts;
+  }
+
+  public void setJournalAlerts(Set<JournalAlert> journalAlerts) {
+    this.journalAlerts = journalAlerts;
   }
 
   public String getProfileUri() {
@@ -320,6 +334,7 @@ public class UserProfile extends AmbraEntity {
   }
 
   public List<String> getAlertsList() {
+    //TODO: Rework to use stored collection, not the string
     if (getAlertsJournals() != null) {
       String[] alerts = getAlertsJournals().split(ALERTS_SEPARATOR);
       List<String> alertsList = new ArrayList<String>(alerts.length);
@@ -331,6 +346,7 @@ public class UserProfile extends AmbraEntity {
   }
 
   public void setAlertsList(List<String> alerts) {
+    //TODO: Rework to use stored collection, not the string
     if (alerts != null && !alerts.isEmpty()) {
       this.alertsJournals = StringUtils.join(alerts, ALERTS_SEPARATOR);
     } else {
@@ -339,6 +355,7 @@ public class UserProfile extends AmbraEntity {
   }
   
   public List<String> getWeeklyAlerts() {
+    //TODO: Rework to use stored collection, not the string
     List<String> weeklyAlerts = new ArrayList<String>();
     if (getAlertsJournals() != null) {
       for (String alert : getAlertsJournals().split(ALERTS_SEPARATOR)) {
@@ -351,6 +368,7 @@ public class UserProfile extends AmbraEntity {
   }
 
   public List<String> getMonthlyAlerts() {
+    //TODO: Rework to use stored collection, not the string
     List<String> monthlyAlerts = new ArrayList<String>();
     if (getAlertsJournals() != null) {
       for (String alert : getAlertsJournals().split(ALERTS_SEPARATOR)) {
