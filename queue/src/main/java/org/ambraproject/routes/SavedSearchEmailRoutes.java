@@ -65,7 +65,7 @@ public class SavedSearchEmailRoutes extends SpringRouteBuilder {
         .setHeader("searchParameters", simple("${body.searchParameters}"))
         .setHeader("currentTime", simple("${body.currentTime}"))
         .setHeader("lastSearchTime", simple("${body.lastSearchTime}"))
-        .setHeader("subject", constant("PLOS Search Alert -").append(simple("${body.searchName}")))
+        .setHeader("subject", constant("PLOS Search Alert - ").append(simple("${body.searchName}")))
         .setHeader("imagePath",constant(imagePath))
         .to("freemarker:email.ftl")
         .setHeader("Content-Type",constant(("text/html; charset=UTF-8")))
