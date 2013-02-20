@@ -27,19 +27,18 @@ public class EmailAlertsRoutes extends SpringRouteBuilder {
 
   @Override
   public void configure() throws Exception {
-
     //Weekly alert emails
     log.info("Setting route for sending 'Weekly' email alerts");
 
     from("quartz:ambra/searchalert/weeklyemail?cron=" + weeklyCron)
-      .setHeader("type", simple("weekly"))
+      .setBody(simple("weekly"))
       .to("direct:getsearches");
 
     //Monthly alert emails
     log.info("Setting route for sending 'Monthly' email alerts");
 
     from("quartz:ambra/searchalert/monthlyemail?cron=" + monthlyCron)
-      .setHeader("type", simple("monthly"))
+      .setBody(simple("monthly"))
       .to("direct:getsearches");
 
     from("direct:getsearches")
@@ -47,7 +46,10 @@ public class EmailAlertsRoutes extends SpringRouteBuilder {
       .to("direct:sendmails");
 
     //Send results in parallel
-    from("direct:sendmails?concurrentConsumers=20")
+    from("direct:sendmails")
+      .to("seda:searchInParallel");
+
+    from("seda:searchInParallel?concurrentConsumers=25")
       .to("bean:journalSearchAlerts?method=sendSearchAlert");
   }
 

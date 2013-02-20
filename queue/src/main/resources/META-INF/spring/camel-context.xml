@@ -35,7 +35,10 @@
 
   <context:component-scan base-package="org.ambraproject"/>
 
-  <!-- beans-->
+  <bean id="mailer" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+    <property name="host" value="${plos.camel.mail"/>
+  </bean>
+
   <bean id="savedSearchBuilder" class="org.ambraproject.routes.SavedSearchEmailRoutes">
     <property name="weeklyCron" value="${ambra.sendemail.weekly}" />
     <property name="monthlyCron" value="${ambra.sendemail.monthly}" />
@@ -99,6 +102,7 @@
   <bean id="journalSearchAlerts" class="org.ambraproject.search.JournalSearchAlertsImpl">
     <property name="searchService" ref="searchService" />
     <property name="journalService" ref="journalService" />
+    <property name="mailer" ref="mailer"/>
   </bean>
 
   <bean id="quartz" class="org.apache.camel.component.quartz.QuartzComponent">
