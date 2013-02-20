@@ -363,6 +363,12 @@
         primary key (userProfileID)
     );
 
+    create table userProfileJournalAlertJoinTable (
+        userProfileID bigint not null,
+        journalAlertID bigint not null,
+        primary key (userProfileID, journalAlertID)
+    );
+
     create table userProfileRoleJoinTable (
         userProfileID bigint not null,
         userRoleID bigint not null,
@@ -552,6 +558,18 @@
         add constraint FK3407F0F78B0DAE3 
         foreign key (userProfileID) 
         references userProfile (userProfileID);
+
+    alter table userProfileJournalAlertJoinTable 
+        add index FK47BDD12178B0DAE3 (userProfileID), 
+        add constraint FK47BDD12178B0DAE3 
+        foreign key (userProfileID) 
+        references userProfile (userProfileID);
+
+    alter table userProfileJournalAlertJoinTable 
+        add index FK47BDD121EBC6EFD9 (journalAlertID), 
+        add constraint FK47BDD121EBC6EFD9 
+        foreign key (journalAlertID) 
+        references journalAlert (journalAlertID);
 
     alter table userProfileRoleJoinTable 
         add index FK57F48A3078B0DAE3 (userProfileID), 
