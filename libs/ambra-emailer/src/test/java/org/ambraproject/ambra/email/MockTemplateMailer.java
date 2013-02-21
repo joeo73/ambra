@@ -22,12 +22,12 @@ package org.ambraproject.ambra.email;
 
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
-
+import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import java.io.IOException;
 import java.util.Map;
 
 @Deprecated
-
 /**
  * There is a mock implementation for the underlying java mail.
  *
@@ -35,8 +35,8 @@ import java.util.Map;
  */
 public class MockTemplateMailer implements TemplateMailer {
 
-  public Multipart createPartForMultipart(final String templateFilename, final Map<String, Object> context,
-                                          final String multipartType, final String mimeType)
+  public Multipart createContent(String textTemplateFilename, String htmlTemplateFilename,
+                                 final Map<String, Object> context) throws IOException, MessagingException
   {
     return null;
   }

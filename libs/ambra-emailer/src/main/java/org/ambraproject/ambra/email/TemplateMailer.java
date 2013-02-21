@@ -29,25 +29,21 @@ import java.util.Map;
  * A contract for all template based emailers.
  */
 public interface TemplateMailer {
-  public final String MIME_TYPE_TEXT_PLAIN = "text/plain";
-  public final String MIME_TYPE_TEXT_HTML = "text/html";
-
   public static final String TO_EMAIL_ADDRESS = "toEmailAddress";
   public static final String USER_NAME_KEY = "name";
 
   /**
    * Helper method for creating Multiparts from a freemarker template for emailing
    *
-   * @param templateFilename the template file name
+   * @param textTemplateFilename textTemplateFilename
+   * @param htmlTemplateFilename htmlTemplateFilename
    * @param context a {@link java.util.Map} of objects to expose to the template engine
-   * @param multipartType the type of part this part is "alternative" or "related"
-   * @param mimeType The mime type, typically: "text/plain; charset=UTF-8" or "text/html; charset=UTF-8"
-
-   * @return the new multipart object to use as part of a mailing
+   * @return the multipart content for a new email
+   * @throws IOException
+   * @throws MessagingException
    */
-  public Multipart createPartForMultipart(final String templateFilename, final Map<String, Object> context,
-                                          final String multipartType, final String mimeType)
-    throws IOException, MessagingException;
+  public Multipart createContent(String textTemplateFilename, String htmlTemplateFilename,
+                                 final Map<String, Object> context) throws IOException, MessagingException;
 
   /**
    * Send a mail with the content specified
