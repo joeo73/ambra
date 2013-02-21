@@ -25,6 +25,13 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import java.util.Map;
 
+@Deprecated
+
+/**
+ * There is a mock implementation for the underlying java mail.
+ *
+ * We should use that and not mock this object
+ */
 public class MockTemplateMailer implements TemplateMailer {
   public void mail(final String toEmailAddress, final String fromEmailAddress, final String subject,
                    final Map<String, Object> context, final String textTemplateFilename,
