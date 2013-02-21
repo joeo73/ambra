@@ -66,8 +66,6 @@ public class FreemarkerTemplateMailer implements TemplateMailer {
   private String fromEmailAddress;
   private String fromEmailName;
 
-  private final String MIME_TYPE_TEXT_PLAIN = "text/plain";
-  private final String MIME_TYPE_TEXT_HTML = "text/html";
   private final Map<String, String> mailContentTypes = new HashMap<String, String>();
   {
     mailContentTypes.put(MIME_TYPE_TEXT_PLAIN, "text");
@@ -78,27 +76,52 @@ public class FreemarkerTemplateMailer implements TemplateMailer {
   private static final String HTML = "html";
   private static final String SUBJECT = "subject";
 
-  public static final String TO_EMAIL_ADDRESS = "toEmailAddress";
-  public static final String USER_NAME_KEY = "name";
   private static final Log log = LogFactory.getLog(FreemarkerTemplateMailer.class);
 
   /**
-   * Mail the email formatted using the given templates
-   * @param toEmailAddresses List of email addresses to which emails should be sent.  White space delimited.
-   * @param fromEmailAddress fromEmailAddress
-   * @param subject subject of the email
-   * @param context context to set the values from for the template
-   * @param textTemplateFilename textTemplateFilename
-   * @param htmlTemplateFilename htmlTemplateFilename
+   * @inheritDoc
    */
   public void mail(final String toEmailAddresses, final String fromEmailAddress, final String subject,
                    final Map<String, Object> context, final String textTemplateFilename,
-                   final String htmlTemplateFilename) {
+                   final String htmlTemplateFilename)
+  {
+    try {
+      // Create a "text" Multipart message
+      final Multipart mp = createPartForMultipart(textTemplateFilename, context, "alternative",
+        MIME_TYPE_TEXT_PLAIN + "; charset=" +
+          configuration.getDefaultEncoding());
+
+      // Create a "HTML" Multipart message
+      final Multipart htmlContent = createPartForMultipart(htmlTemplateFilename, context, "related",
+        MIME_TYPE_TEXT_HTML + "; charset=" +
+          configuration.getDefaultEncoding());
+
+      final BodyPart htmlPart = new MimeBodyPart();
+
+      htmlPart.setContent(htmlContent);
+
+      mp.addBodyPart(htmlPart);
+
+      mail(toEmailAddresses, fromEmailAddress, subject, context, mp);
+
+    } catch(MessagingException ex) {
+      throw new RuntimeException(ex);
+    } catch(IOException ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public void mail(final String toEmailAddresses, final String fromEmailAddress, final String subject,
+                   final Map<String, Object> context, final Multipart content) {
+
     final StringTokenizer emailTokens = new StringTokenizer(toEmailAddresses);
 
     while (emailTokens.hasMoreTokens()) {
       final String toEmailAddress = emailTokens.nextToken();
-      final MimeMessagePreparator preparator = new MimeMessagePreparator() {
+      MimeMessagePreparator preparator = new MimeMessagePreparator() {
         public void prepare(final MimeMessage mimeMessage) throws MessagingException, IOException {
           final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true,
                                                                   configuration.getDefaultEncoding());
@@ -106,48 +129,44 @@ public class FreemarkerTemplateMailer implements TemplateMailer {
           message.setFrom(new InternetAddress(fromEmailAddress, (String) context.get(USER_NAME_KEY)));
           message.setSubject(subject);
 
-          // Create a "text" Multipart message
-          final Multipart mp = createPartForMultipart(textTemplateFilename, context, "alternative",
-                                                      MIME_TYPE_TEXT_PLAIN + "; charset=" +
-                                                      configuration.getDefaultEncoding());
-
-          // Create a "HTML" Multipart message
-          final Multipart htmlContent = createPartForMultipart(htmlTemplateFilename, context, "related",
-                                                               MIME_TYPE_TEXT_HTML + "; charset=" +
-                                                               configuration.getDefaultEncoding());
-
-          final BodyPart htmlPart = new MimeBodyPart();
-          htmlPart.setContent(htmlContent);
-          mp.addBodyPart(htmlPart);
-
-          mimeMessage.setContent(mp);
+          mimeMessage.setContent(content);
         }
       };
+
       mailSender.send(preparator);
+
       if (log.isDebugEnabled()) {
         log.debug("Mail sent to:" + toEmailAddress);
       }
     }
   }
 
-  private Multipart createPartForMultipart(final String templateFilename, final Map<String, Object> context,
+  /**
+   * @inheritDoc
+   */
+  public Multipart createPartForMultipart(final String templateFilename, final Map<String, Object> context,
                                            final String multipartType, final String mimeType)
     throws IOException, MessagingException {
     final Multipart multipart = new MimeMultipart(multipartType);
+
     multipart.addBodyPart(createBodyPart(mimeType, templateFilename, context));
+
     return multipart;
   }
 
   private BodyPart createBodyPart(final String mimeType, final String htmlTemplateFilename,
                                   final Map<String, Object> context)
     throws IOException, MessagingException {
+
     final BodyPart htmlPage = new MimeBodyPart();
     final Template htmlTemplate = configuration.getTemplate(htmlTemplateFilename);
     final String encoding = configuration.getDefaultEncoding();
     final ByteArrayOutputStream outputStream = new ByteArrayOutputStream(100);
     final Writer writer = new BufferedWriter(new OutputStreamWriter(outputStream, encoding));
+
     htmlTemplate.setOutputEncoding(encoding);
     htmlTemplate.setEncoding(encoding);
+
     try {
       htmlTemplate.process(context, writer);
     } catch (TemplateException e) {
@@ -156,12 +175,12 @@ public class FreemarkerTemplateMailer implements TemplateMailer {
     }
 
     htmlPage.setDataHandler(new BodyPartDataHandler(outputStream, mimeType));
+
     return htmlPage;
   }
 
   /**
-   * @see org.ambraproject.ambra.email.TemplateMailer#massMail(java.util.Map, java.lang.String,
-   *      java.lang.String, java.lang.String)
+   * @inheritDoc
    */
   public void massMail(final Map<String, Map<String, Object>> emailAddressContextMap,
                        final String subject, final String textTemplateFilename,

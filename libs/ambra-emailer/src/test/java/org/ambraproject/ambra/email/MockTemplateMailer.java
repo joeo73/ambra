@@ -23,6 +23,7 @@ package org.ambraproject.ambra.email;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
+import javax.mail.Multipart;
 import java.util.Map;
 
 @Deprecated
@@ -33,6 +34,20 @@ import java.util.Map;
  * We should use that and not mock this object
  */
 public class MockTemplateMailer implements TemplateMailer {
+
+  public Multipart createPartForMultipart(final String templateFilename, final Map<String, Object> context,
+                                          final String multipartType, final String mimeType)
+  {
+    return null;
+  }
+
+
+  public void mail(final String toEmailAddress, final String fromEmailAddress, final String subject,
+            final Map<String, Object> context, final Multipart content)
+  {
+
+  }
+
   public void mail(final String toEmailAddress, final String fromEmailAddress, final String subject,
                    final Map<String, Object> context, final String textTemplateFilename,
                    final String htmlTemplateFilename) {
