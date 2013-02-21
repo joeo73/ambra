@@ -42,15 +42,16 @@ public class EmailAlertsRoutes extends SpringRouteBuilder {
       .to("direct:getsearches");
 
     from("direct:getsearches")
-      .split().method("journalSearchAlerts", "getSearchAlerts")
+      .split().method("journalSearchAlerts", "getJournalAlerts")
       .to("direct:sendmails");
 
-    //Send results in parallel
     from("direct:sendmails")
       .to("seda:searchInParallel");
 
+    //Set to 25 consumers, we can increase need be as there are about 15 alerts.
+    //Will run each in parallel with room to grow
     from("seda:searchInParallel?concurrentConsumers=25")
-      .to("bean:journalSearchAlerts?method=sendSearchAlert");
+      .to("bean:journalSearchAlerts?method=sendJournalAlert");
   }
 
   @Required

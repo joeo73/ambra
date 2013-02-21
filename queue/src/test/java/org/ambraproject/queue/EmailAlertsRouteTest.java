@@ -18,16 +18,20 @@ import org.ambraproject.testutils.EmbeddedSolrServerFactory;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.jvnet.mock_javamail.Mailbox;
+
 import static org.testng.Assert.assertFalse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -39,14 +43,14 @@ public class EmailAlertsRouteTest extends BaseTest {
   @Autowired
   protected EmbeddedSolrServerFactory solrServerFactory;
 
-  private static final String DOI_1         = "10.1371/journal.pone.1002222";
-  private static final String DOI_2         = "10.1371/journal.pmed.1002223";
-  private static final String DOI_3         = "10.1371/journal.pone.1002224";
-  private static final String DOI_4         = "10.1371/journal.pmed.1002225";
+  private static final String DOI_1 = "10.1371/journal.pone.1002222";
+  private static final String DOI_2 = "10.1371/journal.pmed.1002223";
+  private static final String DOI_3 = "10.1371/journal.pone.1002224";
+  private static final String DOI_4 = "10.1371/journal.pmed.1002225";
   private static final String JOURNAL_KEY_1 = "PLoSONE";
   private static final String JOURNAL_KEY_2 = "PLoSMedicine";
-  private static final String CATEGORY_1    = "Category1";
-  private static final String CATEGORY_2    = "Category2";
+  private static final String CATEGORY_1 = "Category1";
+  private static final String CATEGORY_2 = "Category2";
 
   @BeforeMethod
   public void seedJournalSearch() {
@@ -121,11 +125,21 @@ public class EmailAlertsRouteTest extends BaseTest {
   }
 
   @BeforeMethod
-  public void seedSolrData() throws Exception{
+  public void seedSolrData() throws Exception {
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+    Calendar weeklyHitDate = Calendar.getInstance();
+    weeklyHitDate.add(Calendar.DAY_OF_MONTH, -5);
+
+    Calendar monthlyHitDate = Calendar.getInstance();
+    monthlyHitDate.add(Calendar.DAY_OF_MONTH, -28);
+
+    Calendar beyond30Date = Calendar.getInstance();
+    beyond30Date.add(Calendar.DAY_OF_MONTH, -35);
 
     // 2 occurrences in "everything": "Spleen"
     Map<String, String[]> document1 = new HashMap<String, String[]>();
-    document1.put("id", new String[] {DOI_1});
+    document1.put("id", new String[]{DOI_1});
     document1.put("title", new String[]{"The First Title, with Spleen testing"});
     document1.put("title_display", new String[]{"The First Title, with Spleen testing"});
     document1.put("author", new String[]{"alpha delta epsilon"});
@@ -135,7 +149,7 @@ public class EmailAlertsRouteTest extends BaseTest {
     document1.put("elocation_id", new String[]{"111"});
     document1.put("volume", new String[]{"1"});
     document1.put("doc_type", new String[]{"full"});
-    document1.put("publication_date", new String[]{"2008-06-13T00:00:00Z"});
+    document1.put("publication_date", new String[]{sdf.format(weeklyHitDate.getTime()) + "T00:00:00Z"});
     document1.put("cross_published_journal_key", new String[]{JOURNAL_KEY_1});
     document1.put("subject", new String[]{CATEGORY_1, CATEGORY_2});
     document1.put("article_type_facet", new String[]{"Not an issue image"});
@@ -154,7 +168,7 @@ public class EmailAlertsRouteTest extends BaseTest {
     document2.put("elocation_id", new String[]{"222"});
     document2.put("volume", new String[]{"2"});
     document2.put("doc_type", new String[]{"full"});
-    document2.put("publication_date", new String[]{"2008-06-20T00:00:00Z"});
+    document2.put("publication_date", new String[]{sdf.format(monthlyHitDate.getTime()) + "T00:00:00Z"});
     document2.put("cross_published_journal_key", new String[]{JOURNAL_KEY_2});
     document2.put("subject", new String[]{CATEGORY_2});
     document2.put("article_type_facet", new String[]{"Not an issue image"});
@@ -173,7 +187,7 @@ public class EmailAlertsRouteTest extends BaseTest {
     document3.put("elocation_id", new String[]{"333"});
     document3.put("volume", new String[]{"3"});
     document3.put("doc_type", new String[]{"full"});
-    document3.put("publication_date", new String[]{"2008-06-22T00:00:00Z"});
+    document3.put("publication_date", new String[]{sdf.format(monthlyHitDate.getTime()) + "T00:00:00Z"});
     document3.put("cross_published_journal_key", new String[]{JOURNAL_KEY_2});
     document3.put("subject", new String[]{CATEGORY_1});
     document3.put("article_type_facet", new String[]{"Not an issue image"});
@@ -192,7 +206,7 @@ public class EmailAlertsRouteTest extends BaseTest {
     document4.put("elocation_id", new String[]{"222"});
     document4.put("volume", new String[]{"2"});
     document4.put("doc_type", new String[]{"full"});
-    document4.put("publication_date", new String[]{"2008-06-20T00:00:00Z"});
+    document4.put("publication_date", new String[]{sdf.format(beyond30Date.getTime()) + "T00:00:00Z"});
     document4.put("cross_published_journal_key", new String[]{JOURNAL_KEY_2});
     document4.put("subject", new String[]{CATEGORY_2});
     document4.put("article_type_facet", new String[]{"Not an issue image"});

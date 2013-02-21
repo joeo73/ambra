@@ -22,6 +22,22 @@
     <property name="host" value="${plos.camel.mail"/>
   </bean>
 
+  <bean id="defaultEncodingCharset" class="java.lang.String">
+    <constructor-arg value="UTF-8"/>
+  </bean>
+
+  <bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+    <property name="templateLoaderPath" value="/"/>
+    <property name="defaultEncoding" ref="defaultEncodingCharset"/>
+  </bean>
+
+  <bean id="freeMarkerMailer" class="org.ambraproject.ambra.email.impl.FreemarkerTemplateMailer">
+    <property name="mailSender" ref="mailer"/>
+    <property name="freemarkerConfig" ref="freemarkerConfig"/>
+    <property name="fromEmailAddress" value="${ambra.queue.fromEmailAddress}" />
+    <property name="fromEmailName" value="${ambra.queue.fromEmailName}" />
+  </bean>
+
   <bean id="searchService" class="org.ambraproject.service.search.SolrSearchService">
     <property name="serverFactory" ref="solrServerFactory"/>
     <property name="configuration" ref="ambraConfiguration"/>
@@ -35,7 +51,7 @@
   <bean id="journalSearchAlerts" class="org.ambraproject.search.JournalSearchAlertsImpl">
     <property name="searchService" ref="searchService"/>
     <property name="journalService" ref="journalService"/>
-    <property name="mailer" ref="mailer"/>
+    <property name="mailer" ref="freeMarkerMailer"/>
   </bean>
 
   <bean id="solrServerFactory" class="org.ambraproject.testutils.EmbeddedSolrServerFactory" destroy-method="tearDown"/>

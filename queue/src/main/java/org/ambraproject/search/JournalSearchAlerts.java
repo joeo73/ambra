@@ -26,7 +26,7 @@ public interface JournalSearchAlerts {
 
    * @return a list of journal alerts
    */
-  public List<JournalAlertView> getSearchAlerts(String type);
+  public List<JournalAlertView> getJournalAlerts(String type);
 
   /**
    * Execute the search for the journal alert and email all of the users
@@ -34,5 +34,5 @@ public interface JournalSearchAlerts {
    *
    * @param alert the alert to process
    */
-  public void sendSearchAlert(JournalAlertView alert);
+  public void sendJournalAlert(JournalAlertView alert);
 }

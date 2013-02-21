@@ -10,27 +10,38 @@
  */
 package org.ambraproject.search;
 
+import org.ambraproject.ApplicationException;
+import org.ambraproject.ambra.email.TemplateMailer;
 import org.ambraproject.service.journal.JournalService;
+import org.ambraproject.service.search.SearchParameters;
 import org.ambraproject.service.search.SolrSearchService;
 import org.ambraproject.views.JournalAlertView;
+import org.ambraproject.views.SearchResultSinglePage;
+import javax.mail.Multipart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
-import org.springframework.mail.javamail.JavaMailSender;
+
+import javax.mail.MessagingException;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class JournalSearchAlertsImpl implements JournalSearchAlerts {
   private static final Logger log = LoggerFactory.getLogger(JournalSearchAlertsImpl.class);
 
   SolrSearchService searchService;
   JournalService journalService;
-  JavaMailSender mailer;
+  TemplateMailer mailer;
 
   /**
    * @inheritDoc
    */
-  public List<JournalAlertView> getSearchAlerts(String alertType) {
+  public List<JournalAlertView> getJournalAlerts(String alertType) {
     List<JournalAlertView> alertViews = new ArrayList<JournalAlertView>();
 
     for(JournalAlertView alertView : journalService.getJournalAlerts()) {
@@ -45,28 +56,84 @@ public class JournalSearchAlertsImpl implements JournalSearchAlerts {
   /**
    * @inheritDoc
    */
-  public void sendSearchAlert(JournalAlertView alert) {
+  public void sendJournalAlert(JournalAlertView alert) {
     log.info("Received thread Name: {}", Thread.currentThread().getName());
     log.info("Starting send request for: {}", alert.getAlertName());
 
-    //TODO: Do stuff here
-    //Build up message.
-    //Send message multiple times
-//    mailer.send(new MimeMessagePreparator[] { new MimeMessagePreparator() {
-//      @Override
-//      public void prepare(MimeMessage mimeMessage) throws Exception {
-//        //To change body of implemented methods use File | Settings | File Templates.
-//      }
-//    }});
+    final Map<String, Object> context = new HashMap<String, Object>();
 
-    try {
-      Thread.sleep(5000);
-    } catch(InterruptedException ex) {
+    Date startTime;
+    Date endTime = Calendar.getInstance().getTime();
 
+    if(alert.getAlertName().contains("weekly")) {
+      //7 days into the past
+      Calendar date = Calendar.getInstance();
+      date.add(Calendar.DAY_OF_MONTH, -7);
+      startTime = date.getTime();
+    } else {
+      //30 days into the past
+      Calendar date = Calendar.getInstance();
+      date.add(Calendar.DAY_OF_MONTH, -30);
+      startTime = date.getTime();
     }
+
+    SearchResultSinglePage results = doSearch(alert.getJournalKey(), startTime, endTime);
+
+    context.put("startTime", startTime);
+    context.put("endTime", endTime);
+    context.put("searchHitList", results.getHits());
+
+    //Create message
+    Multipart content = createContent(context);
+
+    //TODO: Get list of user's emails
+    String toAddresses = "sdfdsf@plos.org,sdfdsf1@plos.org";
+
+    //TODO: move to config:
+    String fromAddress = "admin@plos.org";
+    String subject = "Subject";
+
+    //TODO: Different orderings?
+    mailer.mail(toAddresses, fromAddress, subject, context, content);
 
     log.info("Completed thread Name: {}", Thread.currentThread().getName());
     log.info("Completed send request for: {}", alert.getAlertName());
+  }
+
+  private Multipart createContent(Map<String, Object> context) {
+    try {
+      //TODO: Move filenames to configuration
+      return mailer.createContent("etoc-text.ftl", "etoc-html.ftl", context);
+    } catch(IOException ex) {
+      throw new RuntimeException(ex);
+    } catch(MessagingException ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
+  /**
+   * Run SOLR search looking for new articles published in the defined window for the specific journal
+   * This limits to a max of 1000 articles
+   *
+   * @param journalKey the key of the journal
+   * @param startTime the start time
+   * @param endTime the end time
+   * @return
+   */
+  private SearchResultSinglePage doSearch(String journalKey, Date startTime, Date endTime) {
+    try {
+      SearchParameters sParams = new SearchParameters();
+
+      sParams.setFilterStartDate(startTime);
+      sParams.setFilterStartDate(endTime);
+      sParams.setFilterJournals(new String[]{journalKey});
+      sParams.setPageSize(1000);
+      sParams.setStartPage(0);
+
+      return this.searchService.simpleSearch(sParams);
+    } catch (ApplicationException ex) {
+      throw new RuntimeException(ex);
+    }
   }
 
   @Required
@@ -80,7 +147,7 @@ public class JournalSearchAlertsImpl implements JournalSearchAlerts {
   }
 
   @Required
-  public void setMailer(JavaMailSender mailer) {
+  public void setMailer(TemplateMailer mailer) {
     this.mailer = mailer;
   }
 }
