@@ -83,6 +83,13 @@ public class JournalServiceImpl extends HibernateServiceImpl implements JournalS
     return journals.get(0);
   }
 
+  public List<String> getJournalAlertSubscribers(Long journalAlertID) {
+    List<String> emails = hibernateTemplate.find("select u.email from UserProfile as u " +
+      "inner join journalAlerts as a where a.id = ?", journalAlertID);
+
+    return emails;
+  }
+
   /**
    * Get the Journal from its <strong>eIssn</strong>.
    *

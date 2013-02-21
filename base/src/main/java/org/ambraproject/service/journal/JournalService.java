@@ -85,6 +85,15 @@ public interface JournalService extends HibernateService {
   public List<JournalAlertView> getJournalAlerts();
 
   /**
+   * Return a list of user's emails that are subscribed to a given journal alert
+   *
+   * @param journalAlertID The ID of the journal alert
+   *
+   * @return a list of strings associated with a journal
+   */
+  public List<String> getJournalAlertSubscribers(Long journalAlertID);
+
+  /**
    * Get the list of journals which carry the given object (e.g. article).
    *
    * @param doi the doi of the object

@@ -81,19 +81,24 @@ public class JournalSearchAlertsImpl implements JournalSearchAlerts {
 
     context.put("startTime", startTime);
     context.put("endTime", endTime);
+    //TODO: Move to config
+    context.put("imagePath", "/bleh.gif");
     context.put("searchHitList", results.getHits());
 
     //Create message
+    //TODO: Different orderings of content
     Multipart content = createContent(context);
 
     //TODO: Get list of user's emails
-    String toAddresses = "sdfdsf@plos.org,sdfdsf1@plos.org";
+    List<String> emails = journalService.getJournalAlertSubscribers(alert.getAlertID());
+    String toAddresses = "savedSearch1@example.org savedSearch2@example.org savedSearch3@example.org";
 
-    //TODO: move to config:
+    //TODO: move to config
     String fromAddress = "admin@plos.org";
+
+    //TODO: move to config?
     String subject = "Subject";
 
-    //TODO: Different orderings?
     mailer.mail(toAddresses, fromAddress, subject, context, content);
 
     log.info("Completed thread Name: {}", Thread.currentThread().getName());

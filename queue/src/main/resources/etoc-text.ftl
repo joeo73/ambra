@@ -43,7 +43,7 @@
 
       <div style="border: 0px solid rgb(204, 204, 204);">
         <a title="PLOS Open for Discovery" href="http://www.plosone.org">
-          <img width="728" height="73" border="0" alt="PLOS Open for Discovery" src=${headers.imagePath} /></a>
+          <img width="728" height="73" border="0" alt="PLOS Open for Discovery" src=${imagePath} /></a>
 
     </td>
   </tr>
@@ -86,7 +86,7 @@
     <td valign="top"><a name="top"></a>
 
       <h3>New Articles in <em>PLOS Journals</em></h3>
-      <h4>Published between ${headers.startTime?string("MMM dd yyyy")} - ${headers.endTime?string("MMM dd yyyy")}</h4>
+      <h4>Published between ${startTime?string("MMM dd yyyy")} - ${endTime?string("MMM dd yyyy")}</h4>
 
     </td>
 
@@ -98,7 +98,7 @@
 
 
 
-    <#list headers.searchHitList as searchHit>
+    <#list searchHitList as searchHit>
       <p><a href="http://dx.doi.org/info:doi/${searchHit.uri}"><strong>${searchHit.title}</strong></a><br />
       ${searchHit.creator}
       </p>

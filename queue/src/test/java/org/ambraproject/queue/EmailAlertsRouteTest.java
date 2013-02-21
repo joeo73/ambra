@@ -18,20 +18,17 @@ import org.ambraproject.testutils.EmbeddedSolrServerFactory;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.jvnet.mock_javamail.Mailbox;
-
 import static org.testng.Assert.assertFalse;
-
+import static org.testng.Assert.assertEquals;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -59,7 +56,7 @@ public class EmailAlertsRouteTest extends BaseTest {
     searchTime.set(Calendar.MONTH, 5);
     searchTime.set(Calendar.DAY_OF_MONTH, 15);
 
-    Journal journal = new Journal("one key with alerts");
+    Journal journal = new Journal(JOURNAL_KEY_1);
     journal.setAlerts(new ArrayList<JournalAlert>() {{
       add(new JournalAlert("alert1_weekly"));
       add(new JournalAlert("alert1_monthly"));
@@ -69,9 +66,8 @@ public class EmailAlertsRouteTest extends BaseTest {
     Long id1 = Long.valueOf(dummyDataStore.store(journal));
     Journal stored_journal1 = dummyDataStore.get(Journal.class, id1);
 
-    journal = new Journal("two key with alerts");
+    journal = new Journal(JOURNAL_KEY_2);
     journal.setAlerts(new ArrayList<JournalAlert>() {{
-      add(new JournalAlert("alert2_weekly"));
       add(new JournalAlert("alert2_monthly"));
     }});
 
@@ -79,45 +75,12 @@ public class EmailAlertsRouteTest extends BaseTest {
     Long id2 = Long.valueOf(dummyDataStore.store(journal));
     Journal stored_journal2 = dummyDataStore.get(Journal.class, id2);
 
-    journal = new Journal("three key with alerts");
-    journal.setAlerts(new ArrayList<JournalAlert>() {{
-      add(new JournalAlert("alert3_weekly"));
-      add(new JournalAlert("alert3_monthly"));
-    }});
-
-    //Now load the journal to get assigned IDs
-    Long id3 = Long.valueOf(dummyDataStore.store(journal));
-    Journal stored_journal3 = dummyDataStore.get(Journal.class, id3);
-
-    journal = new Journal("four key with alerts");
-    journal.setAlerts(new ArrayList<JournalAlert>() {{
-      add(new JournalAlert("alert4_weekly"));
-      add(new JournalAlert("alert4_monthly"));
-    }});
-
-    //Now load the journal to get assigned IDs
-    Long id4 = Long.valueOf(dummyDataStore.store(journal));
-    Journal stored_journal4 = dummyDataStore.get(Journal.class, id4);
-
-    journal = new Journal("five key with alerts");
-    journal.setAlerts(new ArrayList<JournalAlert>() {{
-      add(new JournalAlert("alert5_weekly"));
-      add(new JournalAlert("alert5_monthly"));
-    }});
-
-    //Now load the journal to get assigned IDs
-    Long id5 = Long.valueOf(dummyDataStore.store(journal));
-    Journal stored_journal5 = dummyDataStore.get(Journal.class, id5);
-
-    for (int i = 1; i <= 50; i++) {
+    for (int i = 1; i <= 100; i++) {
       UserProfile user = new UserProfile("savedSearch" + i + "@example.org", "user-" + i, "password-" + i);
 
       Set<JournalAlert> alerts = new HashSet<JournalAlert>();
       alerts.addAll(stored_journal1.getAlerts());
       alerts.addAll(stored_journal2.getAlerts());
-      alerts.addAll(stored_journal4.getAlerts());
-      alerts.addAll(stored_journal5.getAlerts());
-      alerts.addAll(stored_journal5.getAlerts());
       user.setJournalAlerts(alerts);
 
       dummyDataStore.store(user);
@@ -141,9 +104,6 @@ public class EmailAlertsRouteTest extends BaseTest {
     Map<String, String[]> document1 = new HashMap<String, String[]>();
     document1.put("id", new String[]{DOI_1});
     document1.put("title", new String[]{"The First Title, with Spleen testing"});
-    document1.put("title_display", new String[]{"The First Title, with Spleen testing"});
-    document1.put("author", new String[]{"alpha delta epsilon"});
-    document1.put("body", new String[]{"Body of the first document: Yak and Spleen"});
     document1.put("everything", new String[]{
       "body first document yak spleen first title with spleen"});
     document1.put("elocation_id", new String[]{"111"});
@@ -232,14 +192,14 @@ public class EmailAlertsRouteTest extends BaseTest {
     start.sendBody("weekly");
 
     //Wait for it!
-    //We send the queue a lot of requests, the only way to complete them in 25 seconds
+    //We send the queue a lot of requests, the only way to complete them in 5 seconds
     //would be in parallel, this validates that that part is working
-    Thread.sleep(25000);
+    Thread.sleep(5000);
 
     //Check results!
-    assertFalse(inbox.isEmpty());
-    assertFalse(inbox1.isEmpty());
-    assertFalse(inbox2.isEmpty());
+    assertEquals(inbox.size(), 3);
+    assertEquals(inbox1.size(), 3);
+    assertEquals(inbox2.size(), 3);
 
     //Message message = inbox.get(0);
 
