@@ -35,8 +35,8 @@ public interface TemplateMailer {
   /**
    * Helper method for creating Multiparts from a freemarker template for emailing
    *
-   * @param textTemplateFilename textTemplateFilename
-   * @param htmlTemplateFilename htmlTemplateFilename
+   * @param textTemplateFilename the text freemarker template
+   * @param htmlTemplateFilename the html freemarker template
    * @param context a {@link java.util.Map} of objects to expose to the template engine
    * @return the multipart content for a new email
    * @throws IOException
