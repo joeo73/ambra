@@ -65,6 +65,22 @@ public interface SearchService {
   List<SearchHit> savedSearchAlerts(SearchParameters sParams, Date lastSearchTime, Date currentSearchTime) throws ApplicationException;
 
   /**
+   * Execute a journalSearch alert
+   *
+   * The results are orderd by article_type asc, publication_date desc
+   *
+   * @param sParams the search params
+   * @param lastSearchTime the start time
+   * @param currentSearchTime the end time
+   *
+   * @return a collection of search hits (Or an empty list)
+   *
+   * @throws ApplicationException
+   */
+  List<SearchHit> journalSearchAlerts(SearchParameters sParams, Date lastSearchTime, Date currentSearchTime)
+    throws ApplicationException;
+
+  /**
    * The map of sorts that are valid for this provider
    * @return
    */

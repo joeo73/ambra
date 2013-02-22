@@ -1055,6 +1055,20 @@ public class SolrSearchService implements SearchService {
     return results.getHits();
   }
 
+  public List<SearchHit> journalSearchAlerts(SearchParameters sParams, Date lastSearchTime, Date currentSearchTime) throws ApplicationException {
+    SolrQuery query = createQuery(null, sParams.getStartPage(), sParams.getPageSize(), false);
+
+    query.setQuery(sParams.getUnformattedQuery());
+    query.addFilterQuery(createFilterLimitForPublishDate(lastSearchTime, currentSearchTime));
+
+    setFilters(query, sParams, true);
+
+    query.addSortField("article_type", SolrQuery.ORDER.asc);
+    query.addSortField("publication_date", SolrQuery.ORDER.desc);
+
+    return search(query).getHits();
+  }
+
 
   /**
    * Remove dangerous and unwanted values from the Strings in selected fields in the SearchParameters parameter.
