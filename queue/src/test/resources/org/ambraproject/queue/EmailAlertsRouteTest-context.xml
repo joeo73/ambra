@@ -39,7 +39,7 @@
   </bean>
 
   <bean id="searchService" class="org.ambraproject.service.search.SolrSearchService">
-    <property name="serverFactory" ref="solrServerFactory"/>
+    <property name="serverFactory" ref="solrJournalAlerts"/>
     <property name="configuration" ref="ambraConfiguration"/>
   </bean>
 
@@ -54,7 +54,7 @@
     <property name="mailer" ref="freeMarkerMailer"/>
   </bean>
 
-  <bean id="solrServerFactory" class="org.ambraproject.testutils.EmbeddedSolrServerFactory" destroy-method="tearDown"/>
+  <bean id="solrJournalAlerts" class="org.ambraproject.testutils.EmbeddedSolrServerFactory" destroy-method="tearDown"/>
 
   <bean id="ambraConfiguration" class="org.ambraproject.testutils.AmbraTestConfigurationFactory"
         factory-method="getConfiguration">

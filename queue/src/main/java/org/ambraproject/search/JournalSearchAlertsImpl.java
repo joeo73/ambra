@@ -18,6 +18,8 @@ import org.ambraproject.service.search.SolrSearchService;
 import org.ambraproject.views.JournalAlertView;
 import org.ambraproject.views.SearchResultSinglePage;
 import javax.mail.Multipart;
+
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
@@ -79,24 +81,29 @@ public class JournalSearchAlertsImpl implements JournalSearchAlerts {
 
     SearchResultSinglePage results = doSearch(alert.getJournalKey(), startTime, endTime);
 
+    log.debug("Matched {} Documents", results.getHits().size());
+
+    //TODO: Different orderings of results
+    context.put("searchHitList", results.getHits());
     context.put("startTime", startTime);
     context.put("endTime", endTime);
+
     //TODO: Move to config
     context.put("imagePath", "/bleh.gif");
-    context.put("searchHitList", results.getHits());
 
     //Create message
-    //TODO: Different orderings of content
+
     Multipart content = createContent(context);
 
-    //TODO: Get list of user's emails
     List<String> emails = journalService.getJournalAlertSubscribers(alert.getAlertID());
-    String toAddresses = "savedSearch1@example.org savedSearch2@example.org savedSearch3@example.org";
 
-    //TODO: move to config
-    String fromAddress = "admin@plos.org";
+    //TODO: provide override for dev mode and allow QA to adjust in ambra.xml
+    String toAddresses = StringUtils.join(emails, " ");
 
     //TODO: move to config?
+    String fromAddress = "admin@plos.org";
+
+    //TODO: This needs to be computed
     String subject = "Subject";
 
     mailer.mail(toAddresses, fromAddress, subject, context, content);
@@ -130,12 +137,17 @@ public class JournalSearchAlertsImpl implements JournalSearchAlerts {
       SearchParameters sParams = new SearchParameters();
 
       sParams.setFilterStartDate(startTime);
-      sParams.setFilterStartDate(endTime);
+      sParams.setFilterEndDate(endTime);
       sParams.setFilterJournals(new String[]{journalKey});
-      sParams.setPageSize(1000);
+
+      //TODO: Limit to one page?  How many is too much?
+      sParams.setPageSize(500);
       sParams.setStartPage(0);
 
-      return this.searchService.simpleSearch(sParams);
+      //Return everything, only search with filters
+      sParams.setUnformattedQuery("*:*");
+
+      return this.searchService.advancedSearch(sParams);
     } catch (ApplicationException ex) {
       throw new RuntimeException(ex);
     }

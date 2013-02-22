@@ -17,37 +17,51 @@ import org.ambraproject.models.UserProfile;
 import org.ambraproject.testutils.EmbeddedSolrServerFactory;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.params.SolrParams;
 import org.jvnet.mock_javamail.Mailbox;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertEquals;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import sun.net.idn.StringPrep;
+
+import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.internet.MimeMultipart;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 @ContextConfiguration
 public class EmailAlertsRouteTest extends BaseTest {
+  private static final Logger log = LoggerFactory.getLogger(EmailAlertsRouteTest.class);
+
   @Autowired
-  protected EmbeddedSolrServerFactory solrServerFactory;
+  protected EmbeddedSolrServerFactory solrJournalAlerts;
 
   private static final String DOI_1 = "10.1371/journal.pone.1002222";
   private static final String DOI_2 = "10.1371/journal.pmed.1002223";
   private static final String DOI_3 = "10.1371/journal.pone.1002224";
   private static final String DOI_4 = "10.1371/journal.pmed.1002225";
-  private static final String JOURNAL_KEY_1 = "PLoSONE";
-  private static final String JOURNAL_KEY_2 = "PLoSMedicine";
+  private static final String JOURNAL_KEY_1 = "PLOSONE";
+  private static final String JOURNAL_KEY_2 = "PLOSMedicine";
   private static final String CATEGORY_1 = "Category1";
   private static final String CATEGORY_2 = "Category2";
+
+  private List<String> addresses = new ArrayList<String>();
 
   @BeforeMethod
   public void seedJournalSearch() {
@@ -83,6 +97,9 @@ public class EmailAlertsRouteTest extends BaseTest {
       alerts.addAll(stored_journal2.getAlerts());
       user.setJournalAlerts(alerts);
 
+      //I re-use the emails in the unit test
+      addresses.add(user.getEmail());
+
       dummyDataStore.store(user);
     }
   }
@@ -91,30 +108,36 @@ public class EmailAlertsRouteTest extends BaseTest {
   public void seedSolrData() throws Exception {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-    Calendar weeklyHitDate = Calendar.getInstance();
-    weeklyHitDate.add(Calendar.DAY_OF_MONTH, -5);
+    Calendar todayMinus5 = Calendar.getInstance();
+    todayMinus5.add(Calendar.DAY_OF_MONTH, -5);
 
-    Calendar monthlyHitDate = Calendar.getInstance();
-    monthlyHitDate.add(Calendar.DAY_OF_MONTH, -28);
+    Calendar todayMinus28 = Calendar.getInstance();
+    todayMinus28.add(Calendar.DAY_OF_MONTH, -28);
 
-    Calendar beyond30Date = Calendar.getInstance();
-    beyond30Date.add(Calendar.DAY_OF_MONTH, -35);
+    Calendar todayMinus35 = Calendar.getInstance();
+    todayMinus35.add(Calendar.DAY_OF_MONTH, -35);
 
     // 2 occurrences in "everything": "Spleen"
     Map<String, String[]> document1 = new HashMap<String, String[]>();
     document1.put("id", new String[]{DOI_1});
     document1.put("title", new String[]{"The First Title, with Spleen testing"});
+    document1.put("title_display", new String[]{"The First Title, with Spleen testing"});
+    document1.put("author", new String[]{"alpha delta epsilon"});
+    document1.put("body", new String[]{"Body of the first document: Yak and Spleen"});
     document1.put("everything", new String[]{
       "body first document yak spleen first title with spleen"});
     document1.put("elocation_id", new String[]{"111"});
     document1.put("volume", new String[]{"1"});
     document1.put("doc_type", new String[]{"full"});
-    document1.put("publication_date", new String[]{sdf.format(weeklyHitDate.getTime()) + "T00:00:00Z"});
+    document1.put("publication_date", new String[]{sdf.format(todayMinus5.getTime()) + "T00:00:00Z"});
     document1.put("cross_published_journal_key", new String[]{JOURNAL_KEY_1});
     document1.put("subject", new String[]{CATEGORY_1, CATEGORY_2});
     document1.put("article_type_facet", new String[]{"Not an issue image"});
     document1.put("author", new String[]{"doc1 author"});
     document1.put("author_display", new String[]{"doc1 creator"});
+
+    log.debug("Created Doc ID: {}, Journal: {}, pubdate: {}", new Object[] {
+      document1.get("id"), document1.get("cross_published_journal_key"), document1.get("publication_date") });
 
     // 2 occurrences in "everything": "Yak"
     Map<String, String[]> document2 = new HashMap<String, String[]>();
@@ -128,12 +151,15 @@ public class EmailAlertsRouteTest extends BaseTest {
     document2.put("elocation_id", new String[]{"222"});
     document2.put("volume", new String[]{"2"});
     document2.put("doc_type", new String[]{"full"});
-    document2.put("publication_date", new String[]{sdf.format(monthlyHitDate.getTime()) + "T00:00:00Z"});
+    document2.put("publication_date", new String[]{sdf.format(todayMinus28.getTime()) + "T00:00:00Z"});
     document2.put("cross_published_journal_key", new String[]{JOURNAL_KEY_2});
     document2.put("subject", new String[]{CATEGORY_2});
     document2.put("article_type_facet", new String[]{"Not an issue image"});
     document2.put("author", new String[]{"doc2 author"});
     document2.put("author_display", new String[]{"doc2 creator"});
+
+    log.debug("Created Doc ID: {}, Journal: {}, pubdate: {}", new Object[] {
+      document2.get("id"), document2.get("cross_published_journal_key"), document2.get("publication_date") });
 
     // 2 occurrences in "everything": "Gecko"
     Map<String, String[]> document3 = new HashMap<String, String[]>();
@@ -147,12 +173,15 @@ public class EmailAlertsRouteTest extends BaseTest {
     document3.put("elocation_id", new String[]{"333"});
     document3.put("volume", new String[]{"3"});
     document3.put("doc_type", new String[]{"full"});
-    document3.put("publication_date", new String[]{sdf.format(monthlyHitDate.getTime()) + "T00:00:00Z"});
-    document3.put("cross_published_journal_key", new String[]{JOURNAL_KEY_2});
+    document3.put("publication_date", new String[]{sdf.format(todayMinus28.getTime()) + "T00:00:00Z"});
+    document3.put("cross_published_journal_key", new String[]{JOURNAL_KEY_1});
     document3.put("subject", new String[]{CATEGORY_1});
     document3.put("article_type_facet", new String[]{"Not an issue image"});
     document3.put("author", new String[]{"doc3 author"});
     document3.put("author_display", new String[]{"doc3 creator"});
+
+    log.debug("Created Doc ID: {}, Journal: {}, pubdate: {}", new Object[] {
+      document3.get("id"), document3.get("cross_published_journal_key"), document3.get("publication_date") });
 
     // 2 occurrences in "everything": "Yak"
     Map<String, String[]> document4 = new HashMap<String, String[]>();
@@ -166,17 +195,20 @@ public class EmailAlertsRouteTest extends BaseTest {
     document4.put("elocation_id", new String[]{"222"});
     document4.put("volume", new String[]{"2"});
     document4.put("doc_type", new String[]{"full"});
-    document4.put("publication_date", new String[]{sdf.format(beyond30Date.getTime()) + "T00:00:00Z"});
+    document4.put("publication_date", new String[]{sdf.format(todayMinus35.getTime()) + "T00:00:00Z"});
     document4.put("cross_published_journal_key", new String[]{JOURNAL_KEY_2});
     document4.put("subject", new String[]{CATEGORY_2});
     document4.put("article_type_facet", new String[]{"Not an issue image"});
     document4.put("author", new String[]{"doc2 author"});
     document4.put("author_display", new String[]{"doc4 creator"});
 
-    solrServerFactory.addDocument(document1);
-    solrServerFactory.addDocument(document2);
-    solrServerFactory.addDocument(document3);
-    solrServerFactory.addDocument(document4);
+    log.debug("Created Doc ID: {}, Journal: {}, pubdate: {}", new Object[] {
+      document4.get("id"), document4.get("cross_published_journal_key"), document4.get("publication_date") });
+
+    solrJournalAlerts.addDocument(document1);
+    solrJournalAlerts.addDocument(document2);
+    solrJournalAlerts.addDocument(document3);
+    solrJournalAlerts.addDocument(document4);
   }
 
   @Produce(uri = "direct:getsearches")
@@ -184,9 +216,6 @@ public class EmailAlertsRouteTest extends BaseTest {
 
   @Test
   public void testWeeklyCron() throws InterruptedException, MessagingException, Exception {
-    List<Message> inbox = Mailbox.get("savedSearch1@example.org");
-    List<Message> inbox1 = Mailbox.get("savedSearch2@example.org");
-    List<Message> inbox2 = Mailbox.get("savedSearch3@example.org");
 
     start.sendBody("monthly");
     start.sendBody("weekly");
@@ -196,14 +225,32 @@ public class EmailAlertsRouteTest extends BaseTest {
     //would be in parallel, this validates that that part is working
     Thread.sleep(5000);
 
-    //Check results!
-    assertEquals(inbox.size(), 3);
-    assertEquals(inbox1.size(), 3);
-    assertEquals(inbox2.size(), 3);
+    //Check the mocked up inboxes for messages
+    for(String address : addresses) {
+      log.debug("Checking on email: {}", address);
 
-    //Message message = inbox.get(0);
+      List<Message> inbox = Mailbox.get(address);
 
-    //assertEquals("Expected Subject", message.getSubject());
+      //Check results!
+      assertEquals(inbox.size(), 3);
+
+      //TODO: check for correct size of inbox
+
+      if(inbox.size() > 0) {
+        Message message = inbox.get(0);
+
+        MimeMultipart mail = (MimeMultipart)message.getContent();
+
+        //inspect the HTML version
+        BodyPart bp = mail.getBodyPart(0);
+        String body = (String)bp.getContent();
+
+        //TODO: Check body for DOIs for expected articles
+
+        //TODO: Check for expected subject
+        assertEquals("Expected Subject", message.getSubject());
+      }
+    }
   }
 }
 

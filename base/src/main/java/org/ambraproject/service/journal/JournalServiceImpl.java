@@ -83,11 +83,13 @@ public class JournalServiceImpl extends HibernateServiceImpl implements JournalS
     return journals.get(0);
   }
 
+  /**
+   * @inherited
+   */
+  @SuppressWarnings("unchecked")
   public List<String> getJournalAlertSubscribers(Long journalAlertID) {
-    List<String> emails = hibernateTemplate.find("select u.email from UserProfile as u " +
-      "inner join journalAlerts as a where a.id = ?", journalAlertID);
-
-    return emails;
+    return hibernateTemplate.find("select u.email from UserProfile as u " +
+      "join u.journalAlerts as a where a.id = ?", journalAlertID);
   }
 
   /**
