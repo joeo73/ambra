@@ -252,7 +252,9 @@
         journalAlertID bigint not null auto_increment,
         lastModified datetime not null,
         created datetime not null,
-        alertName varchar(255),
+        alertKey varchar(255),
+        emailSubject varchar(255),
+        emailArticleOrder varchar(255) not null,
         journalID bigint,
         alertSortOrder integer,
         primary key (journalAlertID)
