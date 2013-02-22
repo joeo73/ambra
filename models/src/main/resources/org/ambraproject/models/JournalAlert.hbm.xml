@@ -21,7 +21,16 @@
 
     <timestamp name="lastModified" column="lastModified"/>
     <property name="created" column="created" type="timestamp" not-null="true" update="false"/>
-    <property name="alertName" type="string" column="alertName"/>
+    <property name="alertKey" type="string" column="alertKey"/>
+    <property name="emailSubject" type="string" column="emailSubject"/>
+
+    <property name="emailArticleOrder" column="emailArticleOrder" not-null="true">
+      <type name="org.ambraproject.hibernate.GenericEnumUserType">
+        <param name="enumClass">org.ambraproject.models.JournalAlertOrderCode</param>
+        <param name="identifierMethod">toString</param>
+        <param name="valueOfMethod">fromString</param>
+      </type>
+    </property>
   </class>
 
 </hibernate-mapping>

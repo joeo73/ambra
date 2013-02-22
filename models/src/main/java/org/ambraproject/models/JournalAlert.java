@@ -19,49 +19,91 @@ package org.ambraproject.models;
  */
 public class JournalAlert extends AmbraEntity {
 
-  private String alertName;
+  private String alertKey;
+  private String emailSubject;
+  private JournalAlertOrderCode emailArticleOrder;
 
   public JournalAlert() {
     super();
   }
 
-  public JournalAlert(String alertName) {
+  public JournalAlert(String alertKey, String emailSubject, JournalAlertOrderCode emailArticleOrder) {
     this();
-    this.alertName = alertName;
+    this.alertKey = alertKey;
+    this.emailSubject = emailSubject;
+    this.emailArticleOrder = emailArticleOrder;
   }
   
   /**
-   * getter for alert name
-   * @return the alert name
+   * Get the alert key
+   * @return the alert key
    */
-  public String getAlertName() {
-    return alertName;
+  public String getAlertKey() {
+    return alertKey;
   }
 
   /**
-   * setter for alert name
-   * @param alertName the name of the alert
+   * Set the alert key
+   * @param alertKey the name of the alert
    */
-  public void setAlertName(String alertName) {
-    this.alertName = alertName;
+  public void setAlertKey(String alertKey) {
+    this.alertKey = alertKey;
+  }
+
+  /**
+   * Get the subject of the email
+   *
+   * @return the subject of the email to send
+   */
+  public String getEmailSubject() {
+    return emailSubject;
+  }
+
+  /**
+   * Set the alert email subject
+   * @param emailSubject
+   */
+  public void setEmailSubject(String emailSubject) {
+    this.emailSubject = emailSubject;
+  }
+
+  /**
+   * Get the order of articles to use in this alert
+   *
+   * @return the order of articles to use in this alert
+   */
+  public JournalAlertOrderCode getEmailArticleOrder() {
+    return emailArticleOrder;
+  }
+
+  /**
+   * Set the order of articles to use in this alert
+   *
+   * @param emailArticleOrder the order of articles to use in this alert
+   */
+  public void setEmailArticleOrder(JournalAlertOrderCode emailArticleOrder) {
+    this.emailArticleOrder = emailArticleOrder;
   }
 
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof JournalAlert)) return false;
+    if (o == null || getClass() != o.getClass()) return false;
 
     JournalAlert that = (JournalAlert) o;
 
-    if (getID() != null ? !getID().equals(that.getID()) : that.getID() != null) return false;
-    if (alertName != null ? !alertName.equals(that.alertName) : that.alertName != null) return false;
+    if (!alertKey.equals(that.alertKey)) return false;
+    if (emailArticleOrder != that.emailArticleOrder) return false;
+    if (!emailSubject.equals(that.emailSubject)) return false;
+
     return true;
   }
 
   @Override
   public int hashCode() {
-    int result = getID() != null ? getID().hashCode() : 0;
-    result = 31 * result + (alertName != null ? alertName.hashCode() : 0);
+    int result = alertKey.hashCode();
+    result = 31 * result + emailSubject.hashCode();
+    result = 31 * result + emailArticleOrder.hashCode();
     return result;
   }
 }

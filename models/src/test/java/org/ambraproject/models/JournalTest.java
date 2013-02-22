@@ -74,8 +74,8 @@ public class JournalTest extends BaseHibernateTest {
     Journal journal = new Journal("journal key with alerts");
 
     List<JournalAlert> alerts = new ArrayList<JournalAlert>() {{
-      add(new JournalAlert("alert"));
-      add(new JournalAlert("alert1"));
+      add(new JournalAlert("alert", "subject email", JournalAlertOrderCode.ARTICLE_TYPE));
+      add(new JournalAlert("alert1", "subject email2", JournalAlertOrderCode.ISSUE_TOC));
     }};
 
     journal.setAlerts(alerts);
@@ -88,6 +88,12 @@ public class JournalTest extends BaseHibernateTest {
     List<JournalAlert> alerts1 = savedJournal.getAlerts();
 
     assertEqualsNoOrder(alerts.toArray(), alerts1.toArray());
+
+    assertEquals("subject email", alerts1.get(0).getEmailSubject());
+    assertEquals(JournalAlertOrderCode.ARTICLE_TYPE, alerts1.get(0).getEmailArticleOrder());
+
+    assertEquals("subject email2", alerts1.get(1).getEmailSubject());
+    assertEquals(JournalAlertOrderCode.ISSUE_TOC, alerts1.get(1).getEmailArticleOrder());
   }
 
   @Test

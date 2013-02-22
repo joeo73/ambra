@@ -133,8 +133,8 @@ public class UserProfileTest extends BaseHibernateTest {
     role.setRoleName("test-role-for-profile");
     hibernateTemplate.save(role);
 
-    JournalAlert alert1 = new JournalAlert("alert_weekly");
-    JournalAlert alert2 = new JournalAlert("alert_monthly");
+    JournalAlert alert1 = new JournalAlert("alert_weekly", "Email subject Weekly", JournalAlertOrderCode.ARTICLE_TYPE);
+    JournalAlert alert2 = new JournalAlert("alert_monthly", "Email subject Monthly", JournalAlertOrderCode.ARTICLE_TYPE);
 
     hibernateTemplate.save(alert1);
     hibernateTemplate.save(alert2);
