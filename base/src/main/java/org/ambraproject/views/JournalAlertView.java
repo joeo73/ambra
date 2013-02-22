@@ -1,6 +1,7 @@
 package org.ambraproject.views;
 
 import org.ambraproject.models.JournalAlert;
+import org.ambraproject.models.JournalAlertOrderCode;
 
 /**
  * Immutable view wrapper around a JournalAlert
@@ -9,12 +10,16 @@ import org.ambraproject.models.JournalAlert;
  */
 public class JournalAlertView {
   private final String journalKey;
-  private final String alertName;
+  private final String alertKey;
+  private final String emailSubject;
+  private final JournalAlertOrderCode emailArticleOrder;
   private final Long alertID;
 
   public JournalAlertView(String journalKey, JournalAlert journalAlert) {
     this.journalKey = journalKey;
-    this.alertName = journalAlert.getAlertName();
+    this.alertKey = journalAlert.getAlertKey();
+    this.emailSubject = journalAlert.getEmailSubject();
+    this.emailArticleOrder = journalAlert.getEmailArticleOrder();
     this.alertID = journalAlert.getID();
   }
 
@@ -22,8 +27,16 @@ public class JournalAlertView {
     return journalKey;
   }
 
-  public String getAlertName() {
-    return alertName;
+  public String getAlertKey() {
+    return alertKey;
+  }
+
+  public String getEmailSubject() {
+    return emailSubject;
+  }
+
+  public JournalAlertOrderCode getEmailArticleOrder() {
+    return emailArticleOrder;
   }
 
   public Long getAlertID() {
