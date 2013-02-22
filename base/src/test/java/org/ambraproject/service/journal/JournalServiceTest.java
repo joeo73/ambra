@@ -15,6 +15,7 @@ package org.ambraproject.service.journal;
 
 import org.ambraproject.models.Article;
 import org.ambraproject.models.JournalAlert;
+import org.ambraproject.models.JournalAlertOrderCode;
 import org.ambraproject.views.JournalAlertView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeMethod;
@@ -55,8 +56,10 @@ public class JournalServiceTest extends BaseTest {
         j.seteIssn((String) row[1]);
         j.setTitle((String) row[2]);
         j.setAlerts(new ArrayList<JournalAlert>() {{
-          add(new JournalAlert(key + "_alert_weekly"));
-          add(new JournalAlert(key + "_alert_monthly"));
+          add(new JournalAlert(key + "_alert_weekly", key + "_alert_weekly_subject",
+            JournalAlertOrderCode.ARTICLE_TYPE));
+          add(new JournalAlert(key + "_alert_monthly", key + "_alert_monthly_subject",
+            JournalAlertOrderCode.ARTICLE_TYPE));
         }});
 
         dummyDataStore.store(j);
@@ -103,7 +106,7 @@ public class JournalServiceTest extends BaseTest {
 
     for(JournalAlertView j : alerts)
     {
-      assertTrue(Arrays.asList(expectedAlerts).contains(j.getAlertName()));
+      assertTrue(Arrays.asList(expectedAlerts).contains(j.getAlertKey()));
     }
   }
 
