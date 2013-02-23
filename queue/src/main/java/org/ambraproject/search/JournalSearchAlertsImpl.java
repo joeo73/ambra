@@ -12,18 +12,19 @@ package org.ambraproject.search;
 
 import org.ambraproject.ApplicationException;
 import org.ambraproject.ambra.email.TemplateMailer;
+import org.ambraproject.models.Journal;
+import org.ambraproject.models.JournalAlertOrderCode;
+import org.ambraproject.service.article.BrowseService;
 import org.ambraproject.service.journal.JournalService;
 import org.ambraproject.service.search.SearchParameters;
 import org.ambraproject.service.search.SolrSearchService;
 import org.ambraproject.views.JournalAlertView;
-import org.ambraproject.views.SearchResultSinglePage;
+import org.ambraproject.views.SearchHit;
 import javax.mail.Multipart;
-
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
-
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ public class JournalSearchAlertsImpl implements JournalSearchAlerts {
 
   SolrSearchService searchService;
   JournalService journalService;
+  BrowseService browseService;
   TemplateMailer mailer;
 
   /**
@@ -47,7 +49,7 @@ public class JournalSearchAlertsImpl implements JournalSearchAlerts {
     List<JournalAlertView> alertViews = new ArrayList<JournalAlertView>();
 
     for(JournalAlertView alertView : journalService.getJournalAlerts()) {
-      if(alertView.getAlertName().contains(alertType)) {
+      if(alertView.getAlertKey().contains(alertType)) {
         alertViews.add(alertView);
       }
     }
@@ -60,14 +62,14 @@ public class JournalSearchAlertsImpl implements JournalSearchAlerts {
    */
   public void sendJournalAlert(JournalAlertView alert) {
     log.info("Received thread Name: {}", Thread.currentThread().getName());
-    log.info("Starting send request for: {}", alert.getAlertName());
+    log.info("Starting send request for: {}", alert.getAlertKey());
 
     final Map<String, Object> context = new HashMap<String, Object>();
 
     Date startTime;
     Date endTime = Calendar.getInstance().getTime();
 
-    if(alert.getAlertName().contains("weekly")) {
+    if(alert.getAlertKey().contains("weekly")) {
       //7 days into the past
       Calendar date = Calendar.getInstance();
       date.add(Calendar.DAY_OF_MONTH, -7);
@@ -79,12 +81,20 @@ public class JournalSearchAlertsImpl implements JournalSearchAlerts {
       startTime = date.getTime();
     }
 
-    SearchResultSinglePage results = doSearch(alert.getJournalKey(), startTime, endTime);
+    List<SearchHit> results = doSearch(alert.getJournalKey(), startTime, endTime);
 
-    log.debug("Matched {} Documents", results.getHits().size());
+    log.debug("Matched {} Documents", results.size());
 
-    //TODO: Different orderings of results
-    context.put("searchHitList", results.getHits());
+    //For this alert, use ordering as defined in the latest issue
+    if(alert.getEmailArticleOrder().equals(JournalAlertOrderCode.ISSUE_TOC)) {
+      //TODO: Different orderings of results
+      Journal journal = journalService.getJournal(alert.getJournalKey());
+      String issueURI = browseService.getLatestIssueFromLatestVolume(journal);
+
+
+    }
+
+    context.put("searchHitList", results);
     context.put("startTime", startTime);
     context.put("endTime", endTime);
 
@@ -103,13 +113,10 @@ public class JournalSearchAlertsImpl implements JournalSearchAlerts {
     //TODO: move to config?
     String fromAddress = "admin@plos.org";
 
-    //TODO: This needs to be computed
-    String subject = "Subject";
-
-    mailer.mail(toAddresses, fromAddress, subject, context, content);
+    mailer.mail(toAddresses, fromAddress, alert.getEmailSubject(), context, content);
 
     log.info("Completed thread Name: {}", Thread.currentThread().getName());
-    log.info("Completed send request for: {}", alert.getAlertName());
+    log.info("Completed send request for: {}", alert.getAlertKey());
   }
 
   private Multipart createContent(Map<String, Object> context) {
@@ -132,12 +139,11 @@ public class JournalSearchAlertsImpl implements JournalSearchAlerts {
    * @param endTime the end time
    * @return
    */
-  private SearchResultSinglePage doSearch(String journalKey, Date startTime, Date endTime) {
+  @SuppressWarnings("unchecked")
+  private List<SearchHit> doSearch(String journalKey, Date startTime, Date endTime) {
     try {
       SearchParameters sParams = new SearchParameters();
 
-      sParams.setFilterStartDate(startTime);
-      sParams.setFilterEndDate(endTime);
       sParams.setFilterJournals(new String[]{journalKey});
 
       //TODO: Limit to one page?  How many is too much?
@@ -147,7 +153,7 @@ public class JournalSearchAlertsImpl implements JournalSearchAlerts {
       //Return everything, only search with filters
       sParams.setUnformattedQuery("*:*");
 
-      return this.searchService.advancedSearch(sParams);
+      return this.searchService.journalSearchAlerts(sParams, startTime, endTime);
     } catch (ApplicationException ex) {
       throw new RuntimeException(ex);
     }
@@ -161,6 +167,11 @@ public class JournalSearchAlertsImpl implements JournalSearchAlerts {
   @Required
   public void setJournalService(JournalService journalService) {
     this.journalService = journalService;
+  }
+
+  @Required
+  public void setBrowseService(BrowseService browseService) {
+    this.browseService = browseService;
   }
 
   @Required

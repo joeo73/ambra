@@ -111,6 +111,41 @@
     <property name="configuration" ref="ambraConfiguration" />
   </bean>
 
+  <bean id="rolesEhCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+    <property name="cacheName" value="RolesCache"/>
+  </bean>
+
+  <bean id="rolesCache" class="org.ambraproject.service.cache.EhcacheProvider">
+    <constructor-arg index="0" ref="rolesEhCache"/>
+  </bean>
+
+  <bean id="permissionsService" class="org.ambraproject.service.permission.PermissionsServiceImpl">
+    <property name="sessionFactory" ref="hibernateSessionFactory"/>
+    <property name="rolesCache" ref="rolesCache"/>
+  </bean>
+
+  <bean id="articleService" class="org.ambraproject.service.article.ArticleServiceImpl">
+    <property name="sessionFactory" ref="hibernateSessionFactory"/>
+    <property name="permissionsService" ref="permissionsService"/>
+  </bean>
+
+  <bean id="browseSolrEhcache" class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+    <property name="cacheName" value="BrowseSolrCache"/>
+  </bean>
+
+  <bean id="browseSolrCache" class="org.ambraproject.service.cache.EhcacheProvider">
+    <constructor-arg index="0" ref="browseSolrEhcache"/>
+    <constructor-arg index="1" value="false"/>
+  </bean>
+
+  <bean id="browseService" class="org.ambraproject.service.article.BrowseServiceImpl">
+    <property name="articleService" ref="articleService"/>
+    <property name="journalService" ref="journalService"/>
+    <property name="sessionFactory" ref="hibernateSessionFactory"/>
+    <property name="browseSolrCache" value="browseSolrCache"/>
+    <property name="configuration" ref="ambraConfiguration" />
+  </bean>
+
   <bean id="savedSearchRunner" class="org.ambraproject.search.SavedSearchRunnerImpl">
     <property name="searchService" ref="searchService" />
   </bean>
@@ -118,6 +153,7 @@
   <bean id="journalSearchAlerts" class="org.ambraproject.search.JournalSearchAlertsImpl">
     <property name="searchService" ref="searchService" />
     <property name="journalService" ref="journalService" />
+    <property name="browseService" ref="browseService" />
     <property name="mailer" ref="freeMarkerMailer"/>
   </bean>
 
