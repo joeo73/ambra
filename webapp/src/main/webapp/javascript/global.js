@@ -1548,6 +1548,12 @@ if ($(document).pjax) {
       $.getScript("http://wl.figshare.com/static/jmvc/main_app/resources/jwplayer/jwplayer.js");
       figshare_widget_load = true;
     }
+    else if (pjax_selected_tab == "related"){
+      if($('div[id="more_by_authors"] > ul').length == 0) {
+        $.getScript("/javascript/related_content.js");
+      }
+    }
+
   });
 }
 
