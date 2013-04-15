@@ -1783,12 +1783,14 @@
 
     <!-- 6/8/12: plos-specific template -->
     <xsl:template match="comment">
-      <xsl:if test="not(self::node()='.')">
+      <xsl:if test="(not(self::node()='.')) and
+      not(starts-with(lower-case(self::node()),'doi:'))">
+
         <xsl:text> </xsl:text>
-        <xsl:apply-templates/>
-        <xsl:if test="substring(.,string-length(.)) != '.'">
-          <xsl:text>. </xsl:text>
-        </xsl:if>
+          <xsl:apply-templates/>
+          <xsl:if test="substring(.,string-length(.)) != '.'">
+            <xsl:text>. </xsl:text>
+          </xsl:if>
       </xsl:if>
     </xsl:template>
 
