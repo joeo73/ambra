@@ -1338,8 +1338,12 @@
     <!-- 1/4/12: plos-specific template -->
     <xsl:template match="mixed-citation">
       <xsl:apply-templates/>
-      <xsl:if test="extraCitationInfo/@doi and not(ext-link)">
-        <xsl:variable name="citedArticleDoi"><xsl:value-of select="extraCitationInfo/@doi"/></xsl:variable>
+
+      <!--kludge: duplicate doi info being reported - instituting logic to override said duplication-->
+      <xsl:variable name="commentText" select="./comment/text()"/>
+      <!--and not(starts-with($commentText,'doi:'))-->
+      <xsl:if test="extraCitationInfo/@doi and not(ext-link) ">
+      <xsl:variable name="citedArticleDoi"><xsl:value-of select="extraCitationInfo/@doi"/></xsl:variable>
         doi:
         <xsl:element name="a">
           <xsl:attribute name="href">http://dx.doi.org/<xsl:value-of select="$citedArticleDoi"/></xsl:attribute>
